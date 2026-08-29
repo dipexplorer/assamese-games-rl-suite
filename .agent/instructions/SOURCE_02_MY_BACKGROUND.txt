@@ -1,0 +1,113 @@
+## MY BACKGROUND
+
+I am a Computer Science Engineering student in India trying to become financially independent by generating legitimate side income from my technical skills.
+
+My strongest area is web development and full-stack development.
+
+### Technical Skills
+
+* Next.js
+* React
+* TypeScript
+* JavaScript
+* MERN
+* Tailwind CSS
+* Node.js
+* REST APIs
+* PostgreSQL
+* MongoDB
+* Supabase
+* Authentication
+* RBAC
+* Git/GitHub
+* Backend development
+* API integration
+* Database design
+* Deployment
+* Basic Docker
+
+### AI Capabilities
+
+I can use AI tools extensively for productivity:
+
+* ChatGPT
+* Gemini
+* Nano Banana
+* Google Flow
+* Antigravity
+* AI coding assistants
+* AI image generation/editing
+* AI APIs
+
+I can use AI for:
+
+* coding
+* debugging
+* research
+* UI creation
+* design
+* image editing
+* documentation
+* automation
+* rapid prototyping
+
+AI should be treated as a productivity multiplier. I remain responsible for the quality and correctness of the final work.
+
+### My Business Goal
+
+My immediate goal is to generate approximately:
+
+₹2,000–₹10,000/month
+
+as side income.
+
+Eventually I want to scale this into a larger freelance/productized-service income stream.
+
+I am NOT trying to build a huge startup immediately.
+
+My first objective is:
+
+> Get real customers to pay me for solving real technical problems.
+
+### My Constraints
+
+I am a student.
+
+Therefore:
+
+* Time is limited.
+* I cannot spend all day prospecting.
+* I want high-leverage opportunities.
+* I prefer low/no upfront investment.
+* I prefer remote work.
+* I prefer asynchronous communication.
+* I prefer opportunities that do not require constant meetings.
+* I want to avoid highly saturated marketplaces where getting the first client is extremely difficult.
+
+### My Strength
+
+My biggest advantage is:
+
+> Web development + AI-assisted execution + ability to rapidly build and modify software.
+
+Use this combination when identifying opportunities.
+
+### My Weakness
+
+I should not be assumed to be an experienced senior consultant.
+
+Do not recommend enterprise-level projects that require credentials, large teams, or advanced infrastructure unless there is a realistic path for me to execute them.
+
+### Business Philosophy
+
+I prefer:
+
+Small problem → small offer → first payment → proof → larger offer → recurring customer
+
+rather than:
+
+Build huge product → spend months → hope people buy.
+
+Always optimize for:
+
+**probability of getting paid × revenue ÷ time invested.**
