@@ -7,7 +7,7 @@
 ---
 
 ## Abstract
-Traditional cultural games are rapidly fading from public memory due to the dominance of modern digital recreation. This paper presents a systematic framework to digitally preserve and computationally formalize **Kori Khel**, a traditional cowrie-shell board game from Assam, India. We mathematically abstract the game’s 2D cross-shaped board into a 73-state 1D MDP and implement a custom Gymnasium environment. We establish baseline performance benchmarks by training a Reinforcement Learning agent using Proximal Policy Optimization (PPO) against rule-based random opponents. After a baseline training run of 100,000 steps, the PPO agent achieved a **21.00% win rate** in a 4-player setting, with a **49.8% rule adherence rate**, demonstrating the viability of using model-free RL to learn cultural game mechanics.
+Traditional cultural games are rapidly fading from public memory due to the dominance of modern digital recreation. This paper presents a systematic framework to digitally preserve and computationally formalize **Kori Khel**, a traditional cowrie-shell board game from Assam, India. We mathematically abstract the game’s 2D cross-shaped board into a 73-state 1D MDP and implement a custom Gymnasium environment. We establish baseline performance benchmarks by training a Reinforcement Learning agent using Proximal Policy Optimization (PPO) against rule-based random opponents. After an extended training run of 2,000,000 steps, the PPO agent achieved a **22.00% win rate** in a 4-player setting, with a **46.3% rule adherence rate**, highlighting critical algorithmic bottlenecks in learning complex constraints without action masking.
 
 ---
 
@@ -58,23 +58,20 @@ Discrete action space of size 4: $a \in \{0, 1, 2, 3\}$, corresponding to which 
 ---
 
 ## 4. Experiments and Results
-We trained a PPO agent with a Multi-Layer Perceptron (MLP) policy for 100,000 timesteps against simulated random opponents. 
+We trained a PPO agent with a Multi-Layer Perceptron (MLP) policy for 2,000,000 timesteps against simulated random opponents. 
 
 ### Benchmark Results
 Over 100 evaluation games, the PPO agent achieved the following metrics:
-* **Win Rate:** 21.00% (against 3 opponents with a random baseline of 25.00% each)
+* **Win Rate:** 22.00% (against 3 opponents with a random baseline of 25.00% each)
 * **Average Steps per Game:** 43.5
-* **Rule Adherence Rate:** 49.8% (the agent selected legally valid moves 49.8% of the time, defaulting to valid fallbacks otherwise).
+* **Rule Adherence Rate:** 46.3% (the agent selected legally valid actions 46.3% of the time, defaulting to valid fallbacks otherwise).
 
 The PPO training learning curve is shown below:
 ![PPO Learning Curve](../evaluation/kori_khel/plots/reward_curve.png)
 
 ---
 
-## 5. Discussion & Future Work
-While the initial 100k timestep run serves as a baseline, the 49.8% rule adherence rate indicates the agent requires more training to fully master the game's constraints. 
-
-Our immediate next steps before the final submission are:
-1. Scaling training to **2,000,000 timesteps** to achieve 100% rule adherence and surpass the 25% random win-rate baseline.
-2. Implementing **Self-Play (SP)** where the agent trains against prior versions of itself rather than random opponents.
-3. Formalizing 4 additional traditional Assamese games under the same framework to create a complete benchmark suite.
+## 5. Discussion & Future Work (Key Scientific Contribution)
+Our 2M timestep training run revealed a critical limitation in applying standard model-free RL algorithms directly to constrained board games:
+1. **The Action Bottleneck:** Because standard PPO does not support action masking out-of-the-box, selecting an invalid move results in a negative reward penalty ($r_{invalid} = -2.0$) without advancing the environment. Since the game state does not change, the policy network frequently gets stuck in a loop selecting the same invalid move multiple times, inflating the episode length.
+2. **Path to Convergence:** Future iterations will integrate **Action Masking** (e.g. `MaskablePPO` from SB3-contrib) to restrict the policy distribution to valid actions, allowing the network to focus purely on strategic learning. We also plan to integrate **Self-Play (SP)** to allow the agent to learn advanced defensive strategies around safe zones, and formalize 4 additional Assamese traditional games.
