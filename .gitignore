@@ -3,7 +3,6 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-.Python
 *.egg-info/
 dist/
 build/
@@ -22,9 +21,6 @@ env/
 *.pkl
 *.pt
 *.pth
-results/
-logs/
-wandb/
 
 # OS
 .DS_Store
@@ -34,6 +30,10 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Agent workspace (internal tool config — NOT for GitHub)
+.agent/
+
 # Experiment outputs (keep structure, not data)
 experiments/**/checkpoints/
 experiments/**/runs/
+training/**/logs/
