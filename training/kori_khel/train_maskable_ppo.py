@@ -93,6 +93,6 @@ def train_maskable_agent(total_timesteps=200000):
         print(f"Error plotting learning curve: {e}")
 
 if __name__ == "__main__":
-    # Default is set to 200,000 for quick local verification.
+    # Default is set to 10,000 for a true 1-minute quick local test.
     # Use 1,000,000 steps to reproduce research baseline results.
-    train_maskable_agent(total_timesteps=200000)
+    train_maskable_agent(total_timesteps=10000)
