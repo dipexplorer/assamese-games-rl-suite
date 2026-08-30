@@ -21,11 +21,11 @@ def train_maskable_agent(total_timesteps=200000):
     Trains a MaskablePPO agent on the Kori Khel environment using action masking.
     Saves the model and the training learning curve graph.
     """
-    print("Initializing training directories for Maskable PPO...")
-    # Create directories for saving models and logs
-    log_dir = "training/kori_khel/logs_maskable/"
-    model_dir = "agents/kori_khel/"
-    plot_dir = "evaluation/kori_khel/plots/"
+    # Create directories for saving models and logs (dynamically resolved to project root)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    log_dir = os.path.join(project_root, "training", "kori_khel", "logs_maskable")
+    model_dir = os.path.join(project_root, "agents", "kori_khel")
+    plot_dir = os.path.join(project_root, "evaluation", "kori_khel", "plots")
     
     os.makedirs(log_dir, exist_ok=True)
     os.makedirs(model_dir, exist_ok=True)
