@@ -61,12 +61,12 @@ Discrete action space of size 4: $a \in \{0, 1, 2, 3\}$, corresponding to which 
 
 ## 4. Experiments and Comparative Results
 We trained two baseline configurations:
-1. **Standard PPO (Unmasked):** Trained for 2,000,000 timesteps, utilizing reward penalties for invalid move selection.
+1. **Standard PPO (Unmasked):** Trained for 1,000,000 (1M) timesteps, utilizing reward penalties for invalid move selection.
 2. **Maskable PPO (Masked):** Trained for 1,000,000 (1M) timesteps, utilizing action masks to restrict the policy distribution to legal actions.
 
 ### Evaluation Benchmarks (100 Games)
 
-| Metric | Standard PPO (Unmasked - 2M Steps) | Maskable PPO (Masked - 1M Steps) |
+| Metric | Standard PPO (Unmasked - 1M Steps) | Maskable PPO (Masked - 1M Steps) |
 | :--- | :---: | :---: |
 | **Win Rate** | 22.00% | **29.00%** |
 | **Rule Adherence Rate** | 46.30% | **100.00%** |
@@ -77,6 +77,6 @@ We trained two baseline configurations:
 
 ## 5. Discussion & Future Work (Key Scientific Contribution)
 Our comparative study reveals critical insights into policy gradient learning on board games:
-1. **Action Bottleneck in Standard PPO:** Standard PPO struggles to converge to legal play even after 2M steps. Because selecting an invalid move leads to a state-loop with negative penalties, the agent gets trapped in local minima, inflating episode lengths (43.5 steps) and capturing only a 22% win rate.
+1. **Action Bottleneck in Standard PPO:** Standard PPO struggles to converge to legal play even after 1M steps. Because selecting an invalid move leads to a state-loop with negative penalties, the agent gets trapped in local minima, inflating episode lengths (43.5 steps) and capturing only a 22% win rate.
 2. **Strategic Superiority of Maskable PPO:** By using action masks, the policy is restricted to valid action manifolds. Combined with a stochastic evaluation policy (`deterministic=False`) to match the luck-based dynamics of the game, the 1M-step Maskable agent achieves a **29.00% win rate**, outperforming the Rule-Compliant Random Baseline (25%) in a 4-player setting.
 3. **Paths to Strategic Dominance:** While the agent now reliably beats random opponents and adheres to rules 100% of the time, future work involves scaling Maskable PPO to **2M steps** and implementing **Self-Play (SP)** to discover advanced defensive and offensive tactics around Safe Zones.
