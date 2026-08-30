@@ -67,8 +67,8 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
                 # Extract action mask for the current state
                 action_mask = get_env_mask(env)
                 
-                # Predict action utilizing the action mask to ensure 100% legal moves
-                action, _states = model.predict(obs, action_masks=action_mask, deterministic=True)
+                # Predict action utilizing the action mask (stochastic evaluation for stochastic board games)
+                action, _states = model.predict(obs, action_masks=action_mask, deterministic=False)
                 action = int(action)
                 
                 total_actions_count += 1
@@ -114,7 +114,8 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
     print("============================================================\n")
 
     # Save results to markdown for reference
-    results_path = "evaluation/kori_khel/benchmark_results_maskable.md"
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    results_path = os.path.join(project_root, "evaluation", "kori_khel", "benchmark_results_maskable.md")
     os.makedirs(os.path.dirname(results_path), exist_ok=True)
     with open(results_path, "w") as f:
         f.write(f"# Kori Khel Maskable PPO Agent Evaluation Benchmark\n\n")
@@ -126,5 +127,6 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
     print(f"Results saved to: {results_path}")
 
 if __name__ == "__main__":
-    model_path = "agents/kori_khel/maskable_ppo_kori_khel.zip"
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    model_path = os.path.join(project_root, "agents", "kori_khel", "maskable_ppo_kori_khel.zip")
     evaluate_maskable_agent(model_path, num_episodes=100)
