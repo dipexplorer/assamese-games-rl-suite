@@ -93,5 +93,6 @@ def train_maskable_agent(total_timesteps=200000):
         print(f"Error plotting learning curve: {e}")
 
 if __name__ == "__main__":
-    # Train for 1,000,000 steps (1M) with masking for strategic convergence
-    train_maskable_agent(total_timesteps=1000000)
+    # Default is set to 200,000 for quick local verification.
+    # Use 1,000,000 steps to reproduce research baseline results.
+    train_maskable_agent(total_timesteps=200000)
