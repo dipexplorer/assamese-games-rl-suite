@@ -87,6 +87,5 @@ def plot_results(log_dir, plot_dir):
     print(f"📈 Learning curve graph saved to: {plot_path}")
 
 if __name__ == "__main__":
-    # Default is set to 10,000 for a true 1-minute quick local test.
-    # Use 2,000,000 steps to reproduce research baseline results.
-    train_agent(total_timesteps=10000)
+    # Train for 2,000,000 steps for optimal convergence
+    train_agent(total_timesteps=2000000)
