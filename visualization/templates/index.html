@@ -295,18 +295,38 @@ function drawTokens(positions) {
         const cell = cellMap[key];
         if (!cell) continue;
         const list = bucket[key];
-        const offsets = list.length === 1 ? [[0,0]]
-                      : list.length === 2 ? [[-5,0],[5,0]]
-                      : list.length === 3 ? [[-6,-6],[6,-6],[0,6]]
-                      :                    [[-6,-6],[6,-6],[-6,6],[6,6]];
+        
+        // Define exact offsets for up to 16 tokens to form a neat 4x4 grid
+        const offsets = [];
+        if (list.length === 1) {
+            offsets.push([0, 0]);
+        } else if (list.length === 2) {
+            offsets.push([-5, 0], [5, 0]);
+        } else if (list.length === 3) {
+            offsets.push([-6, -6], [6, -6], [0, 6]);
+        } else if (list.length === 4) {
+            offsets.push([-6, -6], [6, -6], [-6, 6], [6, 6]);
+        } else {
+            // For > 4 tokens (up to 16), create a 4x4 grid
+            // Grid positions from -9 to +9
+            const spacing = 7; // pixels between tokens
+            const startOffset = -10.5; // center the 4x4 grid
+            for (let i = 0; i < list.length; i++) {
+                const row = Math.floor(i / 4);
+                const col = i % 4;
+                offsets.push([startOffset + row * spacing, startOffset + col * spacing]);
+            }
+        }
+
         list.forEach(({p, t}, i) => {
             const tok = document.createElement('div');
             tok.className = `token tok-p${p}`;
             tok.textContent = t;
             if (list.length > 4) {
-                tok.style.width = '11px'; tok.style.height = '11px'; tok.style.fontSize = '0.38rem';
-                tok.style.left = `calc(50% - 5.5px + ${(Math.random()-0.5)*10}px)`;
-                tok.style.top  = `calc(50% - 5.5px + ${(Math.random()-0.5)*10}px)`;
+                tok.style.width = '10px'; tok.style.height = '10px'; tok.style.fontSize = '0.35rem';
+                tok.style.borderWidth = '1px';
+                tok.style.left = `calc(50% - 5px + ${offsets[i][1]}px)`;
+                tok.style.top  = `calc(50% - 5px + ${offsets[i][0]}px)`;
             } else {
                 tok.style.left = `calc(50% - 8px + ${offsets[i][1]}px)`;
                 tok.style.top  = `calc(50% - 8px + ${offsets[i][0]}px)`;

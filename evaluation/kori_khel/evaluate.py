@@ -45,18 +45,22 @@ def evaluate_agent(model_path, num_episodes=100):
             roll = obs[16]
             valid_moves = env.engine.get_valid_moves(0, roll)
             
-            # PPO Model predicts the action (deterministic=True for evaluation)
-            action, _states = model.predict(obs, deterministic=True)
-            action = int(action)  # Convert numpy int to Python int
-            
-            total_actions_count += 1
-            
-            # --- EVALUATION FALLBACK ---
-            # If PPO predicts an invalid move (since standard SB3 PPO doesn't support action masking out-of-the-box),
-            # we apply a fallback to choose a valid action, but log it to see if PPO has learned the rules.
-            if action not in valid_moves:
-                fallback_actions_count += 1
-                action = int(np.random.choice(valid_moves))
+            # Guard check: If no valid moves are available (e.g. if game is over)
+            if not valid_moves:
+                action = 0  # Dummy action, will trigger the step() game_over check
+            else:
+                # PPO Model predicts the action (deterministic=True for evaluation)
+                action, _states = model.predict(obs, deterministic=True)
+                action = int(action)  # Convert numpy int to Python int
+                
+                total_actions_count += 1
+                
+                # --- EVALUATION FALLBACK ---
+                # If PPO predicts an invalid move (since standard SB3 PPO doesn't support action masking out-of-the-box),
+                # we apply a fallback to choose a valid action, but log it to see if PPO has learned the rules.
+                if action not in valid_moves:
+                    fallback_actions_count += 1
+                    action = int(np.random.choice(valid_moves))
                 
             obs, reward, terminated, truncated, info = env.step(action)
             ep_reward += reward

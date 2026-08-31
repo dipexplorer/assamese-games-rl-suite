@@ -57,6 +57,21 @@ class KoriKhelEnv(gym.Env):
         obs[16] = self.current_roll
         return obs
 
+    def action_masks(self) -> np.ndarray:
+        """Returns a boolean array indicating which actions are valid (True) or invalid (False)."""
+        if self.engine is None or self.engine.game_over:
+            return np.ones(self.action_space.n, dtype=bool)  # Return all True if game over to prevent crash
+
+        valid_moves = self.engine.get_valid_moves(0, self.current_roll)
+        mask = np.zeros(self.action_space.n, dtype=bool)
+        for action in valid_moves:
+            mask[action] = True
+        
+        # SB3-contrib requires at least one valid action to avoid zero probability division errors
+        if not np.any(mask):
+            mask[0] = True
+        return mask
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         
