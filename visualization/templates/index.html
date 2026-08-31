@@ -3,606 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kori Khel - AI Visualizer</title>
+    <title>Kori Khel - Minimal AI Visualizer</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        body { background: #0f172a; color: #e2e8f0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        body {
-            background: #f4f6fa;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+        header { background: #1e293b; border-bottom: 1px solid #334155; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 1.1rem; font-weight: 700; color: #f8fafc; }
+        .badge { font-size: 0.75rem; font-weight: 600; color: #10b981; border: 1px solid rgba(16,185,129,0.3); padding: 3px 10px; border-radius: 12px; background: rgba(16,185,129,0.1); }
 
-        header {
-            background: #fff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0.8rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header h1 { font-size: 1.2rem; font-weight: 700; color: #2d3748; }
-        .badge { font-size: 0.75rem; font-weight: 600; color: #38a169; border: 1px solid #38a169; padding: 2px 10px; border-radius: 12px; }
+        .layout { display: flex; flex: 1; padding: 1.5rem; gap: 1.5rem; overflow: hidden; }
 
-        .layout {
-            display: flex;
-            flex: 1;
-            padding: 1.2rem;
-            gap: 1.2rem;
-            overflow: hidden;
-        }
-
-        /* BOARD PANEL */
-        .board-wrap {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-        }
-
-        /* The 19x19 grid */
+        /* Minimal Board Area */
+        .board-wrap { flex: 1; display: flex; justify-content: center; align-items: center; }
+        
         #boardGrid {
             display: grid;
             grid-template-columns: repeat(19, 1fr);
             grid-template-rows: repeat(19, 1fr);
-            width: min(100%, 95vh);
-            height: min(100%, 95vh);
-            aspect-ratio: 1;
-            position: relative;
+            width: min(100%, 85vh);
+            height: min(100%, 85vh);
+            gap: 2px; /* Naturally forms the cross shape by leaving empty cells blank */
         }
 
         .cell {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative; display: flex; justify-content: center; align-items: center;
+            background: #1e293b; border: 1px solid #334155; border-radius: 4px;
         }
 
-        /* Active path cells: white with red border (matching physical board) */
-        .active { background: #fff; border: 1px solid #c53030; }
-        
-        /* Home column coloring */
-        .home-p0 { background: #f0fff4; }
-        .home-p1 { background: #fff5f5; }
-        .home-p2 { background: #fffaf0; }
-        .home-p3 { background: #faf5ff; }
+        .safe { background: #334155; }
+        .safe::after { content: "✕"; font-size: 1rem; color: #ef4444; opacity: 0.8; }
 
-        /* Safe zone X mark */
-        .safe::after {
-            content: "✕";
-            font-size: 0.9rem;
-            color: #555;
-            pointer-events: none;
-        }
-
-        /* Goal center */
+        .center-zone { background: #27272a; border-color: #3f3f46; }
+        .base-cell { background: #3f3f46; }
         .goal {
-            background: #fff8e1;
-            border: 2px solid #c53030;
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: #c53030;
-            letter-spacing: 0.5px;
+            background: radial-gradient(circle, #fbbf24 0%, #d97706 100%);
+            border: 1px solid #f59e0b; font-size: 0.55rem; font-weight: 800; color: #fff;
+            box-shadow: 0 0 15px rgba(245,158,11,0.4); z-index: 2;
         }
 
-        /* Tokens */
         .token {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            font-size: 0.55rem;
-            font-weight: 800;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
-            transition: all 0.3s ease;
-            z-index: 5;
+            position: absolute; width: 16px; height: 16px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.9); font-size: 0.5rem; font-weight: 800; color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5); transition: all 0.3s ease; z-index: 5;
         }
-        .tok-p0 { background: #38a169; }
-        .tok-p1 { background: #e53e3e; }
-        .tok-p2 { background: #dd6b20; }
-        .tok-p3 { background: #805ad5; }
+        .tok-p0 { background: #10b981; } .tok-p1 { background: #ef4444; }
+        .tok-p2 { background: #f97316; } .tok-p3 { background: #8b5cf6; }
 
-        /* CONTROLS PANEL */
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            width: 300px;
-            min-width: 260px;
-        }
+        /* Minimal Controls */
+        .controls { display: flex; flex-direction: column; gap: 1rem; width: 280px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.2rem; }
+        .card h3 { font-size: 0.85rem; font-weight: 600; color: #94a3b8; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        .btn-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        button { flex: 1; padding: 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-reset { background: #334155; color: #f8fafc; } .btn-reset:hover { background: #475569; }
+        .btn-step { background: #3b82f6; color: #fff; } .btn-step:hover { background: #2563eb; }
+        .btn-auto { background: #10b981; color: #fff; width: 100%; } .btn-auto:hover { background: #059669; }
 
-        .card {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 1.2rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-        }
+        .speed-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #94a3b8; }
+        input[type=range] { flex: 1; accent-color: #3b82f6; }
 
-        .card h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+        .stat { background: #0f172a; border-radius: 6px; padding: 0.6rem; text-align: center; border: 1px solid #334155;}
+        .stat-label { font-size: 0.7rem; color: #64748b; margin-bottom: 4px; }
+        .stat-val { font-size: 1rem; font-weight: 700; color: #f8fafc; }
 
-        .btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .legend-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); }
 
-        button {
-            flex: 1;
-            padding: 0.55rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .btn-reset { background: #edf2f7; color: #4a5568; }
-        .btn-reset:hover { background: #e2e8f0; }
-        .btn-step { background: #3182ce; color: #fff; }
-        .btn-step:hover { background: #2b6cb0; }
-        .btn-auto { background: #38a169; color: #fff; }
-        .btn-auto:hover { background: #2f855a; }
-
-        .speed-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 4px;
-            font-size: 0.8rem;
-            color: #718096;
-        }
-        input[type=range] { flex: 1; accent-color: #3182ce; }
-
-        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .stat {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 0.6rem 0.8rem;
-            border: 1px solid #e2e8f0;
-            text-align: center;
-        }
-        .stat-label { font-size: 0.7rem; color: #718096; margin-bottom: 2px; }
-        .stat-val { font-size: 1rem; font-weight: 700; color: #2d3748; }
-
-        .legend { display: flex; flex-direction: column; gap: 6px; }
-        .legend-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #4a5568; }
-        .legend-dot {
-            width: 14px; height: 14px; border-radius: 50%;
-            border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-
-        /* Log console */
-        .log {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            height: 160px;
-            overflow-y: auto;
-            padding: 0.6rem;
-            font-family: monospace;
-            font-size: 0.75rem;
-            color: #4a5568;
-        }
-        .log-ok { color: #2f855a; }
-        .log-win { color: #2b6cb0; font-weight: bold; }
-        .log-lose { color: #c53030; }
+        .log { background: #0f172a; border: 1px solid #334155; border-radius: 6px; flex: 1; overflow-y: auto; padding: 0.8rem; font-family: monospace; font-size: 0.75rem; color: #94a3b8; scrollbar-width: thin; scrollbar-color: #475569 #0f172a;}
+        .log-ok { color: #10b981; } .log-win { color: #3b82f6; font-weight: bold; } .log-lose { color: #ef4444; }
     </style>
 </head>
 <body>
 <header>
-    <h1>Kori Khel – AI Visualizer</h1>
-    <span class="badge">Maskable PPO</span>
+    <h1>Kori Khel AI</h1>
+    <span class="badge">Model: Maskable PPO (1M)</span>
 </header>
 
 <div class="layout">
-    <!-- Board -->
     <div class="board-wrap">
         <div id="boardGrid"></div>
     </div>
 
-    <!-- Controls -->
     <div class="controls">
         <div class="card">
-            <h3>Controls</h3>
+            <h3>Actions</h3>
             <div class="btn-row">
-                <button class="btn-reset" onclick="resetGame()">↺ Reset</button>
+                <button class="btn-reset" onclick="resetGame()">Reset</button>
                 <button class="btn-step" onclick="stepOnce()">Step →</button>
             </div>
-            <div class="btn-row">
-                <button id="autoBtn" class="btn-auto" onclick="toggleAuto()">▶ Auto Play</button>
-            </div>
-            <div class="speed-row">
+            <button id="autoBtn" class="btn-auto" onclick="toggleAuto()">▶ Auto Play</button>
+            <div class="speed-row" style="margin-top: 12px;">
                 <span>Speed</span>
-                <input type="range" id="speed" min="200" max="2000" value="800" oninput="this.nextElementSibling.textContent=this.value+'ms'">
-                <span>800ms</span>
+                <input type="range" id="speed" min="100" max="1500" value="500" oninput="this.nextElementSibling.textContent=this.value+'ms'">
+                <span>500ms</span>
             </div>
         </div>
 
         <div class="card">
-            <h3>Match Info</h3>
+            <h3>Match Status</h3>
             <div class="stats">
                 <div class="stat"><div class="stat-label">Roll</div><div class="stat-val" id="statRoll">--</div></div>
                 <div class="stat"><div class="stat-label">Step</div><div class="stat-val" id="statStep">0</div></div>
                 <div class="stat"><div class="stat-label">Reward</div><div class="stat-val" id="statReward">0</div></div>
-                <div class="stat"><div class="stat-label">Result</div><div class="stat-val" id="statResult" style="font-size:0.8rem">Active</div></div>
+                <div class="stat"><div class="stat-label">Winner</div><div class="stat-val" id="statResult">--</div></div>
+            </div>
+            <div style="border-top: 1px solid #334155; padding-top: 12px;">
+                <div class="legend-row"><div class="legend-dot" style="background:#10b981"></div> P0 – AI Agent</div>
+                <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div> P1 – Random</div>
+                <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div> P2 – Random</div>
+                <div class="legend-row"><div class="legend-dot" style="background:#8b5cf6"></div> P3 – Random</div>
             </div>
         </div>
 
-        <div class="card">
-            <h3>Players</h3>
-            <div class="legend">
-                <div class="legend-row"><div class="legend-dot" style="background:#38a169"></div> P0 – AI Agent (Maskable PPO)</div>
-                <div class="legend-row"><div class="legend-dot" style="background:#e53e3e"></div> P1 – Random Opponent</div>
-                <div class="legend-row"><div class="legend-dot" style="background:#dd6b20"></div> P2 – Random Opponent</div>
-                <div class="legend-row"><div class="legend-dot" style="background:#805ad5"></div> P3 – Random Opponent</div>
-            </div>
-        </div>
-
-        <div class="card" style="flex:1; min-height:0; display:flex; flex-direction:column;">
-            <h3>Log</h3>
-            <div class="log" id="log">
-                <div>Click Reset to start...</div>
-            </div>
+        <div class="card" style="flex:1; display:flex; flex-direction:column; min-height: 0; padding-bottom: 0.5rem;">
+            <h3>Console Logs</h3>
+            <div class="log" id="log"><div>System ready.</div></div>
         </div>
     </div>
 </div>
 
 <script>
-/* ============================================================
-   BOARD COORDINATE SYSTEM
-   
-   Engine position ranges:
-     0         → Base (ghar)
-     1  to  8  → Right column of Player's own arm (outward, row 1→8)
-     9  to  16 → Left column of Player's own arm (return, row 8→1)
-     17 to  64 → Continuing clockwise around the other 3 arms
-     65 to  72 → Private home column (going toward center goal)
-     73         → Paka (Goal)
-
-   Physical 19×19 grid layout (1-indexed rows/cols):
-     Top arm:    rows 1–8,  cols 9–11  (3 wide)
-     Center:     rows 9–11, cols 9–11  (goal center)
-     Bottom arm: rows 12–19, cols 9–11
-     Left arm:   rows 9–11, cols 1–8
-     Right arm:  rows 9–11, cols 12–19
-
-   Player starting arms:
-     P0 → Bottom arm (arm 0): exits right col going down-to-up,
-          returns left col going up-to-down
-     P1 → Left arm (arm 1)
-     P2 → Top arm (arm 2)
-     P3 → Right arm (arm 3)
-
-   Arm orientation for each starting player (RIGHT col = outgoing, LEFT col = returning):
-     P0 bottom: right col = col 11 rows 19→12, left col = col 9 rows 12→19
-                Tip (row8) = row 12 (outermost)
-     P1 left:   right col = row 9 cols 1→8,   left col = row 11 cols 1→8
-                Tip = col 1
-     P2 top:    right col = col 9 rows 8→1,   left col = col 11 rows 1→8
-                Tip = row 1
-     P3 right:  right col = row 11 cols 19→12, left col = row 9 cols 19→12
-                Tip = col 19
-============================================================ */
-
-// Map local position (1-16 relative to arm start) and arm index
-// to grid (row, col).  armIndex 0=bottom, 1=left, 2=top, 3=right
-function armCellToGrid(armIndex, localPos) {
-    // localPos 1-8  = right col (outgoing, innermost→outermost)
-    // localPos 9-16 = left col (returning, outermost→innermost)
-
-    if (armIndex === 0) {
-        // Bottom arm: cols 9,10,11; rows 19(outer) → 12(inner)
-        if (localPos >= 1 && localPos <= 8) {
-            // Right col = col 11, goes from row 19 (pos 1) to row 12 (pos 8)
-            return [19 - (localPos - 1), 11];
-        } else {
-            // Left col = col 9, goes from row 12 (pos 9) to row 19 (pos 16)
-            let step = localPos - 9; // 0-7
-            return [12 + step, 9];
-        }
-    } else if (armIndex === 1) {
-        // Left arm: rows 9,10,11; cols 1(outer) → 8(inner)
-        if (localPos >= 1 && localPos <= 8) {
-            // Right col = row 9, goes from col 1 (pos 1) to col 8 (pos 8)
-            return [9, localPos];
-        } else {
-            // Left col = row 11, goes from col 8 (pos 9) to col 1 (pos 16)
-            let step = localPos - 9; // 0-7
-            return [11, 8 - step];
-        }
-    } else if (armIndex === 2) {
-        // Top arm: cols 9,10,11; rows 8(outer) → 1(inner) for right col
-        if (localPos >= 1 && localPos <= 8) {
-            // Right col = col 9, goes from row 8 (pos 1) to row 1 (pos 8)
-            return [8 - (localPos - 1), 9];
-        } else {
-            // Left col = col 11, goes from row 1 (pos 9) to row 8 (pos 16)
-            let step = localPos - 9; // 0-7
-            return [1 + step, 11];
-        }
-    } else {
-        // Right arm: rows 9,10,11; cols 19(outer) → 12(inner)
-        if (localPos >= 1 && localPos <= 8) {
-            // Right col = row 11, goes from col 19 (pos 1) to col 12 (pos 8)
-            return [11, 19 - (localPos - 1)];
-        } else {
-            // Left col = row 9, goes from col 12 (pos 9) to col 19 (pos 16)
-            let step = localPos - 9; // 0-7
-            return [9, 12 + step];
-        }
-    }
+// --- CONTINUOUS STAR PATH MATHEMATICS ---
+function armCellToGrid(arm, pos) {
+    if (arm === 0) return pos <= 8 ? [11+pos, 11] : [19-(pos-9), 9];
+    if (arm === 1) return pos <= 8 ? [11, 9-pos] : [9, pos-8];
+    if (arm === 2) return pos <= 8 ? [9-pos, 9] : [pos-8, 11];
+    return pos <= 8 ? [9, 11+pos] : [11, 19-(pos-9)];
 }
 
-// Home column: position 65-72 going from perimeter toward center
-function homeColToGrid(playerId, pos) {
-    let step = pos - 65; // 0=first home cell, 7=last before goal
-    if (playerId === 0) {
-        // Bottom arm home col = middle col 10, row 18→11
-        return [18 - step, 10];
-    } else if (playerId === 1) {
-        // Left arm home col = middle row 10, col 2→9
-        return [10, 2 + step];
-    } else if (playerId === 2) {
-        // Top arm home col = middle col 10, row 7→1... actually 2→9
-        return [7 - step, 10];
-    } else {
-        // Right arm home col = middle row 10, col 18→11
-        return [10, 18 - step];
-    }
-}
-
-// Base positions (corners of the board, outside the cross)
-const BASE_POS = {
-    0: [16, 4],   // P0 bottom-left
-    1: [4, 4],    // P1 top-left
-    2: [4, 16],   // P2 top-right
-    3: [16, 16],  // P3 bottom-right
+const BASES = { 0: [11,11], 1: [11,9], 2: [9,9], 3: [9,11] };
+const SPIRALS = {
+    0: [[11,11],[11,10],[11,9],[10,9],[9,9],[9,10],[9,11],[10,11]],
+    1: [[11,9],[10,9],[9,9],[9,10],[9,11],[10,11],[11,11],[11,10]],
+    2: [[9,9],[9,10],[9,11],[10,11],[11,11],[11,10],[11,9],[10,9]],
+    3: [[9,11],[10,11],[11,11],[11,10],[11,9],[10,9],[9,9],[9,10]]
 };
 
-// Goal positions (slightly offset inside center 3×3)
-const GOAL_POS = {
-    0: [10, 10],
-    1: [9, 10],
-    2: [10, 10],
-    3: [11, 10],
-};
-
-// Main coordinate resolver
-function posToGrid(playerId, position) {
-    if (position === 0) return BASE_POS[playerId];
-    if (position === 73) return GOAL_POS[playerId];
-
-    if (position >= 65 && position <= 72) {
-        return homeColToGrid(playerId, position);
-    }
-
-    // Shared perimeter: positions 1-64 are LOCAL to player.
-    // Each arm has 16 cells. Player's own arm is positions 1-16.
-    // Position 17-32 = next arm clockwise, 33-48 = arm after, 49-64 = last arm.
-    // Arms clockwise from player start: P0=bottom(0), P1=left(1), P2=top(2), P3=right(3)
-    const armOrder = {
-        0: [0, 1, 2, 3],  // P0 starts at bottom, goes left, top, right
-        1: [1, 2, 3, 0],  // P1 starts at left, goes top, right, bottom
-        2: [2, 3, 0, 1],  // P2 starts at top, goes right, bottom, left
-        3: [3, 0, 1, 2],  // P3 starts at right, goes bottom, left, top
-    };
-
-    let armSegment = Math.floor((position - 1) / 16); // 0,1,2,3
-    let localInArm = ((position - 1) % 16) + 1;       // 1-16
-
-    let physicalArm = armOrder[playerId][armSegment];
-    return armCellToGrid(physicalArm, localInArm);
+function posToGrid(p, pos) {
+    if (pos === 0) return BASES[p];
+    if (pos === 73) return [10, 10]; // Center Paka
+    if (pos >= 65) return SPIRALS[p][pos - 65];
+    const armOrder = { 0:[0,1,2,3], 1:[1,2,3,0], 2:[2,3,0,1], 3:[3,0,1,2] };
+    return armCellToGrid(armOrder[p][Math.floor((pos-1)/16)], ((pos-1)%16)+1);
 }
 
-/* ============================================================
-   BOARD GRID BUILDER
-============================================================ */
+// --- MINIMAL DOM RENDERER ---
 const cellMap = {};
-
 function buildGrid() {
     const grid = document.getElementById('boardGrid');
-    grid.innerHTML = '';
-
     for (let r = 1; r <= 19; r++) {
         for (let c = 1; c <= 19; c++) {
+            const inY = r >= 9 && r <= 11, inX = c >= 9 && c <= 11;
+            const isArm = (inY && (c < 9 || c > 11)) || (inX && (r < 9 || r > 11));
+            const isCenter = inY && inX;
+            
+            // Skip useless empty space & unused middle columns
+            if (!isArm && !isCenter) continue; 
+            if (isArm && (r === 10 || c === 10)) continue; 
+
             const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.style.gridRow = r;
-            cell.style.gridColumn = c;
+            cell.className = 'cell'; cell.style.gridRow = r; cell.style.gridColumn = c;
 
-            const inBottom = c >= 9 && c <= 11 && r >= 12 && r <= 19;
-            const inTop    = c >= 9 && c <= 11 && r >= 1  && r <= 8;
-            const inLeft   = r >= 9 && r <= 11 && c >= 1  && c <= 8;
-            const inRight  = r >= 9 && r <= 11 && c >= 12 && c <= 19;
-            const inCenter = r >= 9 && r <= 11 && c >= 9  && c <= 11;
-
-            if (inCenter) {
-                cell.classList.add('active', 'goal');
-                if (r === 10 && c === 10) cell.textContent = 'PAKA';
-            } else if (inBottom || inTop || inLeft || inRight) {
-                cell.classList.add('active');
-
-                // Home column tinting
-                if (c === 10 && r >= 12 && r <= 18) cell.classList.add('home-p0');
-                if (r === 10 && c >= 2  && c <= 8)  cell.classList.add('home-p1');
-                if (c === 10 && r >= 2  && r <= 8)  cell.classList.add('home-p2');
-                if (r === 10 && c >= 12 && c <= 18) cell.classList.add('home-p3');
-
-                // Safe zones (Row 4 from tip = 4 cells from outermost)
-                // Bottom arm tip is row 12: row 12+3=15 for right/left (c=11,c=9), tip col10,row19
-                if ((r === 15 && c === 11) || (r === 15 && c === 9)  || (r === 19 && c === 10)) cell.classList.add('safe');
-                // Left arm tip is col 1: col 1+3=4... but tip is actually col1 row10
-                // safe at row9,col5 and row11,col5
-                if ((r === 9  && c === 5)  || (r === 11 && c === 5)  || (r === 10 && c === 1))  cell.classList.add('safe');
-                // Top arm tip is row 1: row 1+3=4 for c=9,c=11; and tip col10,row1
-                if ((r === 4  && c === 9)  || (r === 4  && c === 11) || (r === 1  && c === 10)) cell.classList.add('safe');
-                // Right arm tip is col 19: safe at row9,col15 and row11,col15; and tip row10,col19
-                if ((r === 9  && c === 15) || (r === 11 && c === 15) || (r === 10 && c === 19)) cell.classList.add('safe');
+            if (isCenter) {
+                cell.classList.add('center-zone');
+                if ((r===11&&c===11)||(r===11&&c===9)||(r===9&&c===9)||(r===9&&c===11)) cell.classList.add('base-cell');
+                if (r===10&&c===10) { cell.classList.add('goal'); cell.textContent = 'PAKA'; }
+            } else {
+                if ((r===15&&c===11)||(r===15&&c===9)||(r===19&&c===11)||(r===19&&c===9)||
+                    (r===9&&c===5)||(r===11&&c===5)||(r===9&&c===1)||(r===11&&c===1)||
+                    (r===4&&c===9)||(r===4&&c===11)||(r===1&&c===9)||(r===1&&c===11)||
+                    (r===9&&c===15)||(r===11&&c===15)||(r===9&&c===19)||(r===11&&c===19)) {
+                    cell.classList.add('safe');
+                }
             }
-
             grid.appendChild(cell);
             cellMap[`${r},${c}`] = cell;
         }
     }
 }
 
-/* ============================================================
-   TOKEN RENDERING
-============================================================ */
-function clearTokens() {
-    document.querySelectorAll('.token').forEach(t => t.remove());
-}
-
+// --- TOKEN LOGIC ---
 function drawTokens(positions) {
-    clearTokens();
-    // Collect all tokens per cell
+    document.querySelectorAll('.token').forEach(t => t.remove());
     const bucket = {};
     for (let p = 0; p < 4; p++) {
-        const toks = positions[`p${p}`];
         for (let t = 0; t < 4; t++) {
-            const [r, c] = posToGrid(p, toks[t]);
+            const [r, c] = posToGrid(p, positions[`p${p}`][t]);
             const key = `${r},${c}`;
             if (!bucket[key]) bucket[key] = [];
-            bucket[key].push({ p, t, pos: toks[t] });
+            bucket[key].push({ p, t, pos: positions[`p${p}`][t] });
         }
     }
-
     for (const key in bucket) {
-        const cell = cellMap[key];
-        if (!cell) continue;
+        if (!cellMap[key]) continue;
         const list = bucket[key];
-
-        // Offset up to 4 tokens inside one cell
-        const offsets = list.length === 1
-            ? [[ 0, 0]]
-            : list.length === 2
-            ? [[-5, 0],[5, 0]]
-            : list.length === 3
-            ? [[-6,-6],[6,-6],[0, 6]]
-            : [[-6,-6],[6,-6],[-6,6],[6,6]];
-
-        list.forEach(({ p, t, pos }, i) => {
+        const offsets = list.length===1 ? [[0,0]] : list.length===2 ? [[-5,0],[5,0]] : list.length===3 ? [[-6,-6],[6,-6],[0,6]] : [[-6,-6],[6,-6],[-6,6],[6,6]];
+        list.forEach(({p, t}, i) => {
             const tok = document.createElement('div');
-            tok.className = `token tok-p${p}`;
-            tok.textContent = t;
-            tok.title = `P${p} T${t} @ pos ${pos}`;
-            tok.style.left  = `calc(50% - 8px + ${offsets[i][1]}px)`;
-            tok.style.top   = `calc(50% - 8px + ${offsets[i][0]}px)`;
-            cell.appendChild(tok);
+            tok.className = `token tok-p${p}`; tok.textContent = t;
+            tok.style.left = `calc(50% - 8px + ${(list.length>4 ? (Math.random()-0.5)*12 : offsets[i][1])}px)`;
+            tok.style.top = `calc(50% - 8px + ${(list.length>4 ? (Math.random()-0.5)*12 : offsets[i][0])}px)`;
+            if(list.length>4) { tok.style.width='12px'; tok.style.height='12px'; tok.style.fontSize='0.4rem'; tok.style.left = `calc(50% - 6px + ${(Math.random()-0.5)*12}px)`; tok.style.top = `calc(50% - 6px + ${(Math.random()-0.5)*12}px)`; }
+            cellMap[key].appendChild(tok);
         });
     }
 }
 
-/* ============================================================
-   SERVER COMMUNICATION
-============================================================ */
-let autoTimer = null;
-let isAuto = false;
-let stepCount = 0;
-let totalReward = 0;
-
-function addLog(msg, cls='') {
-    const log = document.getElementById('log');
-    const div = document.createElement('div');
-    div.className = cls;
-    div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    log.appendChild(div);
-    log.scrollTop = log.scrollHeight;
-}
+// --- SERVER IO ---
+let timer = null, isAuto = false, steps = 0, rew = 0;
+const log = (msg, cls='') => { const e = document.getElementById('log'); e.innerHTML += `<div class="${cls}">[${new Date().toLocaleTimeString()}] ${msg}</div>`; e.scrollTop = e.scrollHeight; };
+const updateStats = (r, s, rw) => { document.getElementById('statRoll').textContent=r; document.getElementById('statStep').textContent=s; document.getElementById('statReward').textContent=rw.toFixed(1); };
 
 function resetGame() {
-    stopAuto();
-    stepCount = 0;
-    totalReward = 0;
-    document.getElementById('statStep').textContent = '0';
-    document.getElementById('statRoll').textContent = '--';
-    document.getElementById('statReward').textContent = '0';
-    document.getElementById('statResult').textContent = 'Active';
-    document.getElementById('statResult').style.color = '#2d3748';
-
-    fetch('/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
-        .then(r => r.json())
-        .then(d => {
-            drawTokens(d.positions);
-            document.getElementById('statRoll').textContent = d.roll;
-            addLog(`Game reset. Roll: ${d.roll}`);
-        });
+    stopAuto(); steps = 0; rew = 0; updateStats('--', 0, 0);
+    const res = document.getElementById('statResult'); res.textContent = '--'; res.style.color = '#f8fafc';
+    fetch('/reset', {method:'POST'}).then(r=>r.json()).then(d => { drawTokens(d.positions); log(`Game reset. Initial Roll: ${d.roll}`); });
 }
 
 function stepOnce() {
-    fetch('/step', { method:'POST' })
-        .then(r => r.json())
-        .then(d => {
-            if (d.error) { addLog(d.error, 'log-lose'); stopAuto(); return; }
-            stepCount++;
-            totalReward += d.reward;
-            document.getElementById('statStep').textContent = stepCount;
-            document.getElementById('statRoll').textContent = d.roll;
-            document.getElementById('statReward').textContent = totalReward.toFixed(1);
-            drawTokens(d.positions);
-
-            addLog(`Roll ${d.action_roll}: P0-T${d.action_token} pos ${d.old_pos}→${d.new_pos}  r=${d.reward.toFixed(1)}`, 'log-ok');
-
-            if (d.game_over) {
-                stopAuto();
-                const el = document.getElementById('statResult');
-                if (d.winner === 0) {
-                    el.textContent = '🏆 AI Won';
-                    el.style.color = '#2f855a';
-                    addLog('GAME OVER: AI (P0) won!', 'log-win');
-                } else {
-                    el.textContent = `P${d.winner} Won`;
-                    el.style.color = '#c53030';
-                    addLog(`GAME OVER: Opponent P${d.winner} won.`, 'log-lose');
-                }
-            }
-        });
+    fetch('/step', {method:'POST'}).then(r=>r.json()).then(d => {
+        if (d.error) return stopAuto();
+        updateStats(d.roll, ++steps, rew += d.reward);
+        drawTokens(d.positions);
+        log(`Roll ${d.action_roll}: P0-T${d.action_token} | r=${d.reward.toFixed(1)}`, 'log-ok');
+        if (d.game_over) {
+            stopAuto();
+            const res = document.getElementById('statResult');
+            res.textContent = d.winner === 0 ? 'AI Won' : `P${d.winner} Won`;
+            res.style.color = d.winner === 0 ? '#10b981' : '#ef4444';
+            log(`GAME OVER: ${res.textContent}`, d.winner === 0 ? 'log-win' : 'log-lose');
+        }
+    });
 }
 
 function toggleAuto() {
-    if (isAuto) { stopAuto(); return; }
-    isAuto = true;
-    document.getElementById('autoBtn').textContent = '⏸ Pause';
-    document.getElementById('autoBtn').style.background = '#718096';
-    loop();
-}
-
-function loop() {
-    if (!isAuto) return;
-    stepOnce();
-    const spd = parseInt(document.getElementById('speed').value);
-    autoTimer = setTimeout(loop, spd);
+    const b = document.getElementById('autoBtn');
+    if (isAuto) return stopAuto();
+    isAuto = true; b.textContent = '⏸ Pause'; b.style.background = '#f59e0b'; loop();
 }
 
 function stopAuto() {
-    isAuto = false;
-    clearTimeout(autoTimer);
-    const btn = document.getElementById('autoBtn');
-    btn.textContent = '▶ Auto Play';
-    btn.style.background = '#38a169';
+    const b = document.getElementById('autoBtn');
+    isAuto = false; clearTimeout(timer); b.textContent = '▶ Auto Play'; b.style.background = '#10b981';
 }
 
-// Build grid and start
-buildGrid();
-resetGame();
+function loop() { if (isAuto) { stepOnce(); timer = setTimeout(loop, document.getElementById('speed').value); } }
+
+buildGrid(); resetGame();
 </script>
 </body>
 </html>
