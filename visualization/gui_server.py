@@ -78,7 +78,7 @@ def step_game():
             action = 0
     else:
         # Get current state observation
-        obs = env._get_obs()
+        obs = raw._get_obs()
         
         # Predict action with action masking
         action_mask = env.action_masks()
