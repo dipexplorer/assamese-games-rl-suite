@@ -7,6 +7,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.append(project_root)
 
 from environments.kori_khel_env import KoriKhelEnv
+from stable_baselines3 import PPO
 from sb3_contrib import MaskablePPO
 from sb3_contrib.common.wrappers import ActionMasker
 
@@ -15,24 +16,48 @@ def mask_fn(env):
     return env.action_masks()
 
 def watch_game():
-    """Loads the trained Maskable PPO model and plays a single game step-by-step in the console."""
-    # Instantiate and wrap the environment
+    """Loads either Maskable PPO or Standard PPO and runs a step-by-step game demo."""
+    print("\n============================================================")
+    print("🏆 KORI KHEL MODEL WATCHER 🏆")
+    print("============================================================")
+    print("Select AI Algorithm to watch:")
+    print("1. Maskable PPO (Masked Model - 100% Rule Compliance)")
+    print("2. Standard PPO (Unmasked Model - Baseline)")
+    print("============================================================")
+    
+    choice = input("Enter choice (1 or 2): ").strip()
+    
     raw_env = KoriKhelEnv()
-    env = ActionMasker(raw_env, mask_fn)
     
-    model_path = os.path.join(project_root, "agents", "kori_khel", "maskable_ppo_kori_khel.zip")
-    if not os.path.exists(model_path):
-        print(f"Error: Model not found at {model_path}. Please train it first.")
+    if choice == "1":
+        # Wrap environment with ActionMasker for Maskable PPO
+        env = ActionMasker(raw_env, mask_fn)
+        model_path = os.path.join(project_root, "agents", "kori_khel", "maskable_ppo_kori_khel.zip")
+        if not os.path.exists(model_path):
+            print(f"Error: Model file not found at {model_path}. Please train it first.")
+            return
+        print(f"\nLoading Maskable PPO model from: {model_path}")
+        model = MaskablePPO.load(model_path)
+        is_masked = True
+    elif choice == "2":
+        # Use raw environment for Standard PPO
+        env = raw_env
+        model_path = os.path.join(project_root, "agents", "kori_khel", "ppo_kori_khel.zip")
+        if not os.path.exists(model_path):
+            print(f"Error: Model file not found at {model_path}. Please train it first.")
+            return
+        print(f"\nLoading Standard PPO model from: {model_path}")
+        model = PPO.load(model_path)
+        is_masked = False
+    else:
+        print("Invalid choice. Exiting.")
         return
-        
-    print(f"Loading trained Maskable PPO model from: {model_path}")
-    model = MaskablePPO.load(model_path)
-    
+
     # Reset environment
     obs, info = env.reset()
     
     print("\n============================================================")
-    print("🏆 KORI KHEL INTERACTIVE VISUAL WATCH SCRIPT 🏆")
+    print("GAME INITIALIZED")
     print("============================================================")
     print(raw_env.render())
     print("============================================================\n")
@@ -45,16 +70,19 @@ def watch_game():
         step_count += 1
         input(f"👉 [Step {step_count}] Press Enter to see AI's move...")
         
-        # Extract current state details for printing
         roll = raw_env.current_roll
         valid_moves = raw_env.engine.get_valid_moves(0, roll)
         
-        # Predict action (using stochastic mode for organic play)
-        action_mask = env.action_masks()
-        action, _states = model.predict(obs, action_masks=action_mask, deterministic=False)
+        # Predict action based on chosen model configuration
+        if is_masked:
+            action_mask = env.action_masks()
+            action, _states = model.predict(obs, action_masks=action_mask, deterministic=False)
+        else:
+            action, _states = model.predict(obs, deterministic=False)
+            
         action = int(action)
         
-        # Get movement details before stepping
+        # Save old position for reporting
         old_position = raw_env.engine.players[0].tokens[action].position
         
         # Step the environment
@@ -62,21 +90,24 @@ def watch_game():
         
         new_position = raw_env.engine.players[0].tokens[action].position
         
-        # Print description of the move
+        # Print description of the step
         print("\n------------------------------------------------------------")
-        print(f"🤖 AI (Player 0) rolled {roll} | Valid tokens: {valid_moves}")
-        print(f"🎯 Action: Selected Token {action} | Moved: Cell {old_position} -> Cell {new_position}")
+        print(f"🤖 AI rolled {roll} | Valid tokens: {valid_moves}")
         
-        # Display capture/goal notices
-        if new_position == 73:
+        if not is_masked and "invalid" in info:
+            print(f"❌ Action: Selected Token {action} (ILLEGAL MOVE!) | Penalty: -2.0")
+        else:
+            print(f"🎯 Action: Selected Token {action} | Moved: Cell {old_position} -> Cell {new_position}")
+            
+        if new_position == 73 and old_position < 73:
             print("🎉 Success: Token reached the Goal (Paka)!")
         
-        # Render the updated board state
+        # Render current state
         print("------------------------------------------------------------")
         print(raw_env.render())
         print("------------------------------------------------------------\n")
         
-        time.sleep(0.5)
+        time.sleep(0.3)
         
     print("============================================================")
     print("🏁 GAME OVER 🏁")
