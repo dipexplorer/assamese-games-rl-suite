@@ -4,681 +4,605 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kori Khel - AI Visualizer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #f7f9fc;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --primary-accent: #d32f2f; /* Deep red matching the physical board lines */
-            --p0-color: #38a169; /* Soft green */
-            --p1-color: #e53e3e; /* Soft red */
-            --p2-color: #dd6b20; /* Soft orange */
-            --p3-color: #805ad5; /* Soft purple */
-            --text-main: #2d3748;
-            --text-mute: #718096;
-            --grid-line-color: #d32f2f;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Outfit', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
+            background: #f4f6fa;
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
 
         header {
-            background: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.8rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
+        header h1 { font-size: 1.2rem; font-weight: 700; color: #2d3748; }
+        .badge { font-size: 0.75rem; font-weight: 600; color: #38a169; border: 1px solid #38a169; padding: 2px 10px; border-radius: 12px; }
 
-        header h1 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-main);
-            letter-spacing: -0.5px;
-        }
-
-        .status-badge {
-            font-weight: 600;
-            color: var(--p0-color);
-            border: 1px solid var(--p0-color);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            background: rgba(56, 161, 105, 0.05);
-        }
-
-        .main-container {
+        .layout {
             display: flex;
             flex: 1;
-            padding: 2rem;
-            gap: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            align-items: stretch;
+            padding: 1.2rem;
+            gap: 1.2rem;
+            overflow: hidden;
         }
 
-        /* LEFT COLUMN: Board Visualization */
-        .board-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
+        /* BOARD PANEL */
+        .board-wrap {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-            flex: 1.2;
-            aspect-ratio: 1;
-            min-width: 500px;
+            flex: 1;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         }
 
-        /* 19x19 Board Grid */
-        .board-grid {
+        /* The 19x19 grid */
+        #boardGrid {
             display: grid;
             grid-template-columns: repeat(19, 1fr);
             grid-template-rows: repeat(19, 1fr);
-            width: 100%;
-            height: 100%;
-            background: transparent;
+            width: min(100%, 95vh);
+            height: min(100%, 95vh);
+            aspect-ratio: 1;
             position: relative;
         }
 
-        /* Inactive cell default style: invisible */
         .cell {
-            background: transparent;
-            border: none;
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
         }
 
-        /* Active path arm cells: clean white back, solid red border matching physical layout */
-        .cell.active-path {
-            border: 1px solid var(--grid-line-color);
-            background: #ffffff;
-        }
+        /* Active path cells: white with red border (matching physical board) */
+        .active { background: #fff; border: 1px solid #c53030; }
+        
+        /* Home column coloring */
+        .home-p0 { background: #f0fff4; }
+        .home-p1 { background: #fff5f5; }
+        .home-p2 { background: #fffaf0; }
+        .home-p3 { background: #faf5ff; }
 
-        /* Shaded Home Track columns */
-        .cell.home-p0 { background: rgba(56, 161, 105, 0.08); }
-        .cell.home-p1 { background: rgba(229, 62, 62, 0.08); }
-        .cell.home-p2 { background: rgba(221, 107, 32, 0.08); }
-        .cell.home-p3 { background: rgba(128, 90, 213, 0.08); }
-
-        /* Safe Zones (Marked with X) */
-        .cell.safe-zone::before {
+        /* Safe zone X mark */
+        .safe::after {
             content: "✕";
-            position: absolute;
-            color: #2d3748;
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 0.9rem;
+            color: #555;
             pointer-events: none;
         }
 
-        /* Goal (Paka) 3x3 Center Block */
-        .cell.goal-area {
-            background: #ffffff;
-            border: 1px solid var(--grid-line-color);
-            color: var(--grid-line-color);
+        /* Goal center */
+        .goal {
+            background: #fff8e1;
+            border: 2px solid #c53030;
+            font-size: 0.65rem;
             font-weight: 700;
-            font-size: 0.8rem;
+            color: #c53030;
+            letter-spacing: 0.5px;
         }
-        
-        /* Middle goal center text cell */
-        .cell.goal-center {
-            font-weight: 800;
-            font-size: 0.95rem;
-            color: var(--primary-accent);
-            background: rgba(211, 47, 47, 0.05);
-        }
-
-        /* Corner Base zones */
-        .base-zone {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .base-p0 { background: rgba(56, 161, 105, 0.05); border: 1px dashed rgba(56, 161, 105, 0.25); color: var(--p0-color); }
-        .base-p1 { background: rgba(229, 62, 62, 0.05); border: 1px dashed rgba(229, 62, 62, 0.25); color: var(--p1-color); }
-        .base-p2 { background: rgba(221, 107, 32, 0.05); border: 1px dashed rgba(221, 107, 32, 0.25); color: var(--p2-color); }
-        .base-p3 { background: rgba(128, 90, 213, 0.05); border: 1px dashed rgba(128, 90, 213, 0.25); color: var(--p3-color); }
 
         /* Tokens */
         .token {
-            width: 18px;
-            height: 18px;
+            position: absolute;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
+            border: 2px solid #fff;
+            font-size: 0.55rem;
+            font-weight: 800;
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 0.6rem;
-            font-weight: 800;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-            border: 1.5px solid #ffffff;
-            transition: all 0.25s ease;
-            position: absolute;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            transition: all 0.3s ease;
             z-index: 5;
         }
+        .tok-p0 { background: #38a169; }
+        .tok-p1 { background: #e53e3e; }
+        .tok-p2 { background: #dd6b20; }
+        .tok-p3 { background: #805ad5; }
 
-        .token.p0 { background-color: var(--p0-color); color: #ffffff; }
-        .token.p1 { background-color: var(--p1-color); color: #ffffff; }
-        .token.p2 { background-color: var(--p2-color); color: #ffffff; }
-        .token.p3 { background-color: var(--p3-color); color: #ffffff; }
-
-        /* RIGHT COLUMN: Control Panel */
-        .control-column {
+        /* CONTROLS PANEL */
+        .controls {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            flex: 0.8;
-            min-width: 380px;
+            gap: 1rem;
+            width: 300px;
+            min-width: 260px;
         }
 
-        .control-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         }
 
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--text-main);
-            border-bottom: 1px solid #edf2f7;
-            padding-bottom: 8px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
+        .card h3 {
             font-size: 0.9rem;
             font-weight: 600;
-            cursor: pointer;
-            outline: none;
-            border: none;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
+            color: #4a5568;
+            margin-bottom: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .btn-primary {
-            background: #3182ce;
-            color: #ffffff;
-        }
-        .btn-primary:hover {
-            background: #2b6cb0;
-        }
+        .btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
 
-        .btn-secondary {
-            background: #edf2f7;
-            color: var(--text-main);
-            border: 1px solid #cbd5e0;
-        }
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        .btn-success {
-            background: #38a169;
-            color: #ffffff;
-        }
-        .btn-success:hover {
-            background: #2f855a;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .stat-box {
-            background: #f7f9fc;
+        button {
+            flex: 1;
+            padding: 0.55rem 0.8rem;
             border-radius: 8px;
-            padding: 0.7rem 0.9rem;
-            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-reset { background: #edf2f7; color: #4a5568; }
+        .btn-reset:hover { background: #e2e8f0; }
+        .btn-step { background: #3182ce; color: #fff; }
+        .btn-step:hover { background: #2b6cb0; }
+        .btn-auto { background: #38a169; color: #fff; }
+        .btn-auto:hover { background: #2f855a; }
+
+        .speed-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+        input[type=range] { flex: 1; accent-color: #3182ce; }
+
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #e2e8f0;
             text-align: center;
         }
+        .stat-label { font-size: 0.7rem; color: #718096; margin-bottom: 2px; }
+        .stat-val { font-size: 1rem; font-weight: 700; color: #2d3748; }
 
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-mute);
-            margin-bottom: 2px;
+        .legend { display: flex; flex-direction: column; gap: 6px; }
+        .legend-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #4a5568; }
+        .legend-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            flex-shrink: 0;
         }
 
-        .stat-value {
-            font-size: 1.05rem;
-            font-weight: 700;
-        }
-        .stat-value.accent { color: var(--primary-accent); }
-        .stat-value.success { color: var(--p0-color); }
-
-        /* Logger Output */
-        .log-terminal {
+        /* Log console */
+        .log {
             background: #f8fafc;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 0.8rem;
-            font-family: monospace;
-            font-size: 0.8rem;
-            height: 220px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            height: 160px;
             overflow-y: auto;
-            color: #334155;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            padding: 0.6rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #4a5568;
         }
-
-        .log-entry {
-            line-height: 1.35;
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 3px;
-        }
-
-        .log-entry.invalid { color: #e53e3e; }
-        .log-entry.success { color: #38a169; font-weight: bold; }
-        .log-entry.header { color: #dd6b20; font-weight: bold; }
-
-        .slider-container {
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: var(--text-mute);
-        }
-
-        .slider {
-            flex: 1;
-            margin-left: 10px;
-            accent-color: #3182ce;
-        }
+        .log-ok { color: #2f855a; }
+        .log-win { color: #2b6cb0; font-weight: bold; }
+        .log-lose { color: #c53030; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Kori Khel AI Visualizer</h1>
-        <span class="status-badge">Maskable PPO Agent</span>
-    </header>
+<header>
+    <h1>Kori Khel – AI Visualizer</h1>
+    <span class="badge">Maskable PPO</span>
+</header>
 
-    <div class="main-container">
-        <!-- LEFT: Board Card -->
-        <div class="board-card">
-            <div class="board-grid" id="boardGrid">
-                <!-- Cells generated by Javascript -->
+<div class="layout">
+    <!-- Board -->
+    <div class="board-wrap">
+        <div id="boardGrid"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="card">
+            <h3>Controls</h3>
+            <div class="btn-row">
+                <button class="btn-reset" onclick="resetGame()">↺ Reset</button>
+                <button class="btn-step" onclick="stepOnce()">Step →</button>
+            </div>
+            <div class="btn-row">
+                <button id="autoBtn" class="btn-auto" onclick="toggleAuto()">▶ Auto Play</button>
+            </div>
+            <div class="speed-row">
+                <span>Speed</span>
+                <input type="range" id="speed" min="200" max="2000" value="800" oninput="this.nextElementSibling.textContent=this.value+'ms'">
+                <span>800ms</span>
             </div>
         </div>
 
-        <!-- RIGHT: Control Column -->
-        <div class="control-column">
-            <div class="control-card">
-                <div class="card-title">AI Simulation Controls</div>
-
-                <div class="btn-group">
-                    <button class="btn btn-secondary" onclick="resetGame()">Reset Game</button>
-                    <button class="btn btn-primary" id="stepBtn" onclick="stepGame()">Next Step (AI)</button>
-                </div>
-
-                <div class="btn-group">
-                    <button class="btn btn-success" id="autoBtn" onclick="toggleAutoPlay()">Auto Play</button>
-                </div>
-
-                <div class="slider-container">
-                    <span>Speed:</span>
-                    <input type="range" min="100" max="2000" value="800" class="slider" id="speedSlider" onchange="updateSpeed()">
-                    <span id="speedVal" style="margin-left: 8px;">800ms</span>
-                </div>
+        <div class="card">
+            <h3>Match Info</h3>
+            <div class="stats">
+                <div class="stat"><div class="stat-label">Roll</div><div class="stat-val" id="statRoll">--</div></div>
+                <div class="stat"><div class="stat-label">Step</div><div class="stat-val" id="statStep">0</div></div>
+                <div class="stat"><div class="stat-label">Reward</div><div class="stat-val" id="statReward">0</div></div>
+                <div class="stat"><div class="stat-label">Result</div><div class="stat-val" id="statResult" style="font-size:0.8rem">Active</div></div>
             </div>
+        </div>
 
-            <div class="control-card">
-                <div class="card-title">Live Match Statistics</div>
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <div class="stat-label">Current Roll</div>
-                        <div class="stat-value accent" id="rollVal">--</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Total Steps</div>
-                        <div class="stat-value" id="stepsVal">0</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Rule Adherence</div>
-                        <div class="stat-value success" id="adherenceVal">100.0%</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-label">Winner Status</div>
-                        <div class="stat-value" id="winnerVal" style="font-size:0.85rem; font-weight:bold;">Active</div>
-                    </div>
-                </div>
+        <div class="card">
+            <h3>Players</h3>
+            <div class="legend">
+                <div class="legend-row"><div class="legend-dot" style="background:#38a169"></div> P0 – AI Agent (Maskable PPO)</div>
+                <div class="legend-row"><div class="legend-dot" style="background:#e53e3e"></div> P1 – Random Opponent</div>
+                <div class="legend-row"><div class="legend-dot" style="background:#dd6b20"></div> P2 – Random Opponent</div>
+                <div class="legend-row"><div class="legend-dot" style="background:#805ad5"></div> P3 – Random Opponent</div>
             </div>
+        </div>
 
-            <div class="control-card" style="flex: 1; display:flex; flex-direction:column;">
-                <div class="card-title">Simulation Output Console</div>
-                <div class="log-terminal" id="logConsole">
-                    <div class="log-entry header">Initializing Environment... Click 'Reset Game' to start.</div>
-                </div>
+        <div class="card" style="flex:1; min-height:0; display:flex; flex-direction:column;">
+            <h3>Log</h3>
+            <div class="log" id="log">
+                <div>Click Reset to start...</div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        let isAutoPlaying = false;
-        let autoPlayTimer = null;
-        let stepCount = 0;
-        let totalActions = 0;
-        let invalidActions = 0;
-        let speed = 800;
+<script>
+/* ============================================================
+   BOARD COORDINATE SYSTEM
+   
+   Engine position ranges:
+     0         → Base (ghar)
+     1  to  8  → Right column of Player's own arm (outward, row 1→8)
+     9  to  16 → Left column of Player's own arm (return, row 8→1)
+     17 to  64 → Continuing clockwise around the other 3 arms
+     65 to  72 → Private home column (going toward center goal)
+     73         → Paka (Goal)
 
-        const grid = document.getElementById("boardGrid");
-        const cellMap = {};
+   Physical 19×19 grid layout (1-indexed rows/cols):
+     Top arm:    rows 1–8,  cols 9–11  (3 wide)
+     Center:     rows 9–11, cols 9–11  (goal center)
+     Bottom arm: rows 12–19, cols 9–11
+     Left arm:   rows 9–11, cols 1–8
+     Right arm:  rows 9–11, cols 12–19
 
-        function buildBoardGrid() {
-            grid.innerHTML = "";
-            for (let r = 1; r <= 19; r++) {
-                for (let c = 1; c <= 19; c++) {
-                    const cell = document.createElement("div");
-                    cell.className = "cell";
-                    cell.style.gridRowStart = r;
-                    cell.style.gridColStart = c;
-                    
-                    let isActive = false;
-                    
-                    // Bottom Arm: cols 9, 10, 11 | rows 12 to 19
-                    if (c >= 9 && c <= 11 && r >= 12 && r <= 19) isActive = true;
-                    // Top Arm: cols 9, 10, 11 | rows 1 to 8
-                    if (c >= 9 && c <= 11 && r >= 1 && r <= 8) isActive = true;
-                    // Left Arm: rows 9, 10, 11 | cols 1 to 8
-                    if (r >= 9 && r <= 11 && c >= 1 && c <= 8) isActive = true;
-                    // Right Arm: rows 9, 10, 11 | cols 12 to 19
-                    if (r >= 9 && r <= 11 && c >= 12 && c <= 19) isActive = true;
-                    // Goal Center Square: rows 9-11, cols 9-11
-                    if (r >= 9 && r <= 11 && c >= 9 && c <= 11) {
-                        cell.classList.add("goal-area");
-                        if (r === 10 && c === 10) {
-                            cell.classList.add("goal-center");
-                            cell.innerText = "PAKA";
-                        }
-                    }
+   Player starting arms:
+     P0 → Bottom arm (arm 0): exits right col going down-to-up,
+          returns left col going up-to-down
+     P1 → Left arm (arm 1)
+     P2 → Top arm (arm 2)
+     P3 → Right arm (arm 3)
 
-                    if (isActive) {
-                        cell.classList.add("active-path");
-                        
-                        // Shading home paths
-                        if (c === 10 && r >= 12 && r <= 18) cell.classList.add("home-p0");
-                        if (r === 10 && c >= 2 && c <= 8) cell.classList.add("home-p1");
-                        if (c === 10 && r >= 2 && r <= 8) cell.classList.add("home-p2");
-                        if (r === 10 && c >= 12 && c <= 18) cell.classList.add("home-p3");
-                        
-                        // Safe Zones 'X' symbols (Symmetric Row 4 on sides, Row 8 on middle tip)
-                        // Bottom arm (Rows 12 to 19)
-                        if ((r === 15 && c === 9) || (r === 15 && c === 11) || (r === 19 && c === 10)) cell.classList.add("safe-zone");
-                        // Left arm (Cols 1 to 8)
-                        if ((r === 9 && c === 5) || (r === 11 && c === 5) || (r === 10 && c === 1)) cell.classList.add("safe-zone");
-                        // Top arm (Rows 1 to 8)
-                        if ((r === 5 && c === 9) || (r === 5 && c === 11) || (r === 1 && c === 10)) cell.classList.add("safe-zone");
-                        // Right arm (Cols 12 to 19)
-                        if ((r === 9 && c === 15) || (r === 11 && c === 15) || (r === 10 && c === 19)) cell.classList.add("safe-zone");
-                    }
+   Arm orientation for each starting player (RIGHT col = outgoing, LEFT col = returning):
+     P0 bottom: right col = col 11 rows 19→12, left col = col 9 rows 12→19
+                Tip (row8) = row 12 (outermost)
+     P1 left:   right col = row 9 cols 1→8,   left col = row 11 cols 1→8
+                Tip = col 1
+     P2 top:    right col = col 9 rows 8→1,   left col = col 11 rows 1→8
+                Tip = row 1
+     P3 right:  right col = row 11 cols 19→12, left col = row 9 cols 19→12
+                Tip = col 19
+============================================================ */
 
-                    // Bases (Player corners)
-                    if (r === 16 && c === 4) { cell.classList.add("base-zone", "base-p0"); cell.innerText = "P0 Base"; }
-                    if (r === 4 && c === 4) { cell.classList.add("base-zone", "base-p1"); cell.innerText = "P1 Base"; }
-                    if (r === 4 && c === 16) { cell.classList.add("base-zone", "base-p2"); cell.innerText = "P2 Base"; }
-                    if (r === 16 && c === 16) { cell.classList.add("base-zone", "base-p3"); cell.innerText = "P3 Base"; }
+// Map local position (1-16 relative to arm start) and arm index
+// to grid (row, col).  armIndex 0=bottom, 1=left, 2=top, 3=right
+function armCellToGrid(armIndex, localPos) {
+    // localPos 1-8  = right col (outgoing, innermost→outermost)
+    // localPos 9-16 = left col (returning, outermost→innermost)
 
-                    grid.appendChild(cell);
-                    cellMap[`${r}-${c}`] = cell;
+    if (armIndex === 0) {
+        // Bottom arm: cols 9,10,11; rows 19(outer) → 12(inner)
+        if (localPos >= 1 && localPos <= 8) {
+            // Right col = col 11, goes from row 19 (pos 1) to row 12 (pos 8)
+            return [19 - (localPos - 1), 11];
+        } else {
+            // Left col = col 9, goes from row 12 (pos 9) to row 19 (pos 16)
+            let step = localPos - 9; // 0-7
+            return [12 + step, 9];
+        }
+    } else if (armIndex === 1) {
+        // Left arm: rows 9,10,11; cols 1(outer) → 8(inner)
+        if (localPos >= 1 && localPos <= 8) {
+            // Right col = row 9, goes from col 1 (pos 1) to col 8 (pos 8)
+            return [9, localPos];
+        } else {
+            // Left col = row 11, goes from col 8 (pos 9) to col 1 (pos 16)
+            let step = localPos - 9; // 0-7
+            return [11, 8 - step];
+        }
+    } else if (armIndex === 2) {
+        // Top arm: cols 9,10,11; rows 8(outer) → 1(inner) for right col
+        if (localPos >= 1 && localPos <= 8) {
+            // Right col = col 9, goes from row 8 (pos 1) to row 1 (pos 8)
+            return [8 - (localPos - 1), 9];
+        } else {
+            // Left col = col 11, goes from row 1 (pos 9) to row 8 (pos 16)
+            let step = localPos - 9; // 0-7
+            return [1 + step, 11];
+        }
+    } else {
+        // Right arm: rows 9,10,11; cols 19(outer) → 12(inner)
+        if (localPos >= 1 && localPos <= 8) {
+            // Right col = row 11, goes from col 19 (pos 1) to col 12 (pos 8)
+            return [11, 19 - (localPos - 1)];
+        } else {
+            // Left col = row 9, goes from col 12 (pos 9) to col 19 (pos 16)
+            let step = localPos - 9; // 0-7
+            return [9, 12 + step];
+        }
+    }
+}
+
+// Home column: position 65-72 going from perimeter toward center
+function homeColToGrid(playerId, pos) {
+    let step = pos - 65; // 0=first home cell, 7=last before goal
+    if (playerId === 0) {
+        // Bottom arm home col = middle col 10, row 18→11
+        return [18 - step, 10];
+    } else if (playerId === 1) {
+        // Left arm home col = middle row 10, col 2→9
+        return [10, 2 + step];
+    } else if (playerId === 2) {
+        // Top arm home col = middle col 10, row 7→1... actually 2→9
+        return [7 - step, 10];
+    } else {
+        // Right arm home col = middle row 10, col 18→11
+        return [10, 18 - step];
+    }
+}
+
+// Base positions (corners of the board, outside the cross)
+const BASE_POS = {
+    0: [16, 4],   // P0 bottom-left
+    1: [4, 4],    // P1 top-left
+    2: [4, 16],   // P2 top-right
+    3: [16, 16],  // P3 bottom-right
+};
+
+// Goal positions (slightly offset inside center 3×3)
+const GOAL_POS = {
+    0: [10, 10],
+    1: [9, 10],
+    2: [10, 10],
+    3: [11, 10],
+};
+
+// Main coordinate resolver
+function posToGrid(playerId, position) {
+    if (position === 0) return BASE_POS[playerId];
+    if (position === 73) return GOAL_POS[playerId];
+
+    if (position >= 65 && position <= 72) {
+        return homeColToGrid(playerId, position);
+    }
+
+    // Shared perimeter: positions 1-64 are LOCAL to player.
+    // Each arm has 16 cells. Player's own arm is positions 1-16.
+    // Position 17-32 = next arm clockwise, 33-48 = arm after, 49-64 = last arm.
+    // Arms clockwise from player start: P0=bottom(0), P1=left(1), P2=top(2), P3=right(3)
+    const armOrder = {
+        0: [0, 1, 2, 3],  // P0 starts at bottom, goes left, top, right
+        1: [1, 2, 3, 0],  // P1 starts at left, goes top, right, bottom
+        2: [2, 3, 0, 1],  // P2 starts at top, goes right, bottom, left
+        3: [3, 0, 1, 2],  // P3 starts at right, goes bottom, left, top
+    };
+
+    let armSegment = Math.floor((position - 1) / 16); // 0,1,2,3
+    let localInArm = ((position - 1) % 16) + 1;       // 1-16
+
+    let physicalArm = armOrder[playerId][armSegment];
+    return armCellToGrid(physicalArm, localInArm);
+}
+
+/* ============================================================
+   BOARD GRID BUILDER
+============================================================ */
+const cellMap = {};
+
+function buildGrid() {
+    const grid = document.getElementById('boardGrid');
+    grid.innerHTML = '';
+
+    for (let r = 1; r <= 19; r++) {
+        for (let c = 1; c <= 19; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.style.gridRow = r;
+            cell.style.gridColumn = c;
+
+            const inBottom = c >= 9 && c <= 11 && r >= 12 && r <= 19;
+            const inTop    = c >= 9 && c <= 11 && r >= 1  && r <= 8;
+            const inLeft   = r >= 9 && r <= 11 && c >= 1  && c <= 8;
+            const inRight  = r >= 9 && r <= 11 && c >= 12 && c <= 19;
+            const inCenter = r >= 9 && r <= 11 && c >= 9  && c <= 11;
+
+            if (inCenter) {
+                cell.classList.add('active', 'goal');
+                if (r === 10 && c === 10) cell.textContent = 'PAKA';
+            } else if (inBottom || inTop || inLeft || inRight) {
+                cell.classList.add('active');
+
+                // Home column tinting
+                if (c === 10 && r >= 12 && r <= 18) cell.classList.add('home-p0');
+                if (r === 10 && c >= 2  && c <= 8)  cell.classList.add('home-p1');
+                if (c === 10 && r >= 2  && r <= 8)  cell.classList.add('home-p2');
+                if (r === 10 && c >= 12 && c <= 18) cell.classList.add('home-p3');
+
+                // Safe zones (Row 4 from tip = 4 cells from outermost)
+                // Bottom arm tip is row 12: row 12+3=15 for right/left (c=11,c=9), tip col10,row19
+                if ((r === 15 && c === 11) || (r === 15 && c === 9)  || (r === 19 && c === 10)) cell.classList.add('safe');
+                // Left arm tip is col 1: col 1+3=4... but tip is actually col1 row10
+                // safe at row9,col5 and row11,col5
+                if ((r === 9  && c === 5)  || (r === 11 && c === 5)  || (r === 10 && c === 1))  cell.classList.add('safe');
+                // Top arm tip is row 1: row 1+3=4 for c=9,c=11; and tip col10,row1
+                if ((r === 4  && c === 9)  || (r === 4  && c === 11) || (r === 1  && c === 10)) cell.classList.add('safe');
+                // Right arm tip is col 19: safe at row9,col15 and row11,col15; and tip row10,col19
+                if ((r === 9  && c === 15) || (r === 11 && c === 15) || (r === 10 && c === 19)) cell.classList.add('safe');
+            }
+
+            grid.appendChild(cell);
+            cellMap[`${r},${c}`] = cell;
+        }
+    }
+}
+
+/* ============================================================
+   TOKEN RENDERING
+============================================================ */
+function clearTokens() {
+    document.querySelectorAll('.token').forEach(t => t.remove());
+}
+
+function drawTokens(positions) {
+    clearTokens();
+    // Collect all tokens per cell
+    const bucket = {};
+    for (let p = 0; p < 4; p++) {
+        const toks = positions[`p${p}`];
+        for (let t = 0; t < 4; t++) {
+            const [r, c] = posToGrid(p, toks[t]);
+            const key = `${r},${c}`;
+            if (!bucket[key]) bucket[key] = [];
+            bucket[key].push({ p, t, pos: toks[t] });
+        }
+    }
+
+    for (const key in bucket) {
+        const cell = cellMap[key];
+        if (!cell) continue;
+        const list = bucket[key];
+
+        // Offset up to 4 tokens inside one cell
+        const offsets = list.length === 1
+            ? [[ 0, 0]]
+            : list.length === 2
+            ? [[-5, 0],[5, 0]]
+            : list.length === 3
+            ? [[-6,-6],[6,-6],[0, 6]]
+            : [[-6,-6],[6,-6],[-6,6],[6,6]];
+
+        list.forEach(({ p, t, pos }, i) => {
+            const tok = document.createElement('div');
+            tok.className = `token tok-p${p}`;
+            tok.textContent = t;
+            tok.title = `P${p} T${t} @ pos ${pos}`;
+            tok.style.left  = `calc(50% - 8px + ${offsets[i][1]}px)`;
+            tok.style.top   = `calc(50% - 8px + ${offsets[i][0]}px)`;
+            cell.appendChild(tok);
+        });
+    }
+}
+
+/* ============================================================
+   SERVER COMMUNICATION
+============================================================ */
+let autoTimer = null;
+let isAuto = false;
+let stepCount = 0;
+let totalReward = 0;
+
+function addLog(msg, cls='') {
+    const log = document.getElementById('log');
+    const div = document.createElement('div');
+    div.className = cls;
+    div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+}
+
+function resetGame() {
+    stopAuto();
+    stepCount = 0;
+    totalReward = 0;
+    document.getElementById('statStep').textContent = '0';
+    document.getElementById('statRoll').textContent = '--';
+    document.getElementById('statReward').textContent = '0';
+    document.getElementById('statResult').textContent = 'Active';
+    document.getElementById('statResult').style.color = '#2d3748';
+
+    fetch('/reset', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
+        .then(r => r.json())
+        .then(d => {
+            drawTokens(d.positions);
+            document.getElementById('statRoll').textContent = d.roll;
+            addLog(`Game reset. Roll: ${d.roll}`);
+        });
+}
+
+function stepOnce() {
+    fetch('/step', { method:'POST' })
+        .then(r => r.json())
+        .then(d => {
+            if (d.error) { addLog(d.error, 'log-lose'); stopAuto(); return; }
+            stepCount++;
+            totalReward += d.reward;
+            document.getElementById('statStep').textContent = stepCount;
+            document.getElementById('statRoll').textContent = d.roll;
+            document.getElementById('statReward').textContent = totalReward.toFixed(1);
+            drawTokens(d.positions);
+
+            addLog(`Roll ${d.action_roll}: P0-T${d.action_token} pos ${d.old_pos}→${d.new_pos}  r=${d.reward.toFixed(1)}`, 'log-ok');
+
+            if (d.game_over) {
+                stopAuto();
+                const el = document.getElementById('statResult');
+                if (d.winner === 0) {
+                    el.textContent = '🏆 AI Won';
+                    el.style.color = '#2f855a';
+                    addLog('GAME OVER: AI (P0) won!', 'log-win');
+                } else {
+                    el.textContent = `P${d.winner} Won`;
+                    el.style.color = '#c53030';
+                    addLog(`GAME OVER: Opponent P${d.winner} won.`, 'log-lose');
                 }
             }
-        }
+        });
+}
 
-        // Global perimeter cell coords mapping (1 to 64)
-        function getGlobalPerimeterCoords(cell) {
-            // Bottom Arm (1 to 16)
-            if (cell >= 1 && cell <= 8) return [11 + cell, 11];
-            if (cell >= 9 && cell <= 16) return [19 - (cell - 9), 9];
-            
-            // Left Arm (17 to 32)
-            if (cell >= 17 && cell <= 24) return [9, 8 - (cell - 17)];
-            if (cell >= 25 && cell <= 32) return [11, 1 + (cell - 25)];
-            
-            // Top Arm (33 to 48)
-            if (cell >= 33 && cell <= 40) return [8 - (cell - 33), 9];
-            if (cell >= 41 && cell <= 48) return [1 + (cell - 41), 11];
-            
-            // Right Arm (49 to 64)
-            if (cell >= 49 && cell <= 56) return [11, 12 + (cell - 49)];
-            if (cell >= 57 && cell <= 64) return [9, 19 - (cell - 57)];
-            
-            return [10, 10];
-        }
+function toggleAuto() {
+    if (isAuto) { stopAuto(); return; }
+    isAuto = true;
+    document.getElementById('autoBtn').textContent = '⏸ Pause';
+    document.getElementById('autoBtn').style.background = '#718096';
+    loop();
+}
 
-        // Map token position (0-73) for player (0-3) to (row, col)
-        function getGridCoords(playerId, position) {
-            if (position === 73) {
-                const offsets = [
-                    [10, 10], [9, 10], [10, 9], [11, 10]
-                ];
-                return offsets[playerId];
-            }
-            if (position === 0) {
-                const bases = [
-                    [16, 4], [4, 4], [4, 16], [16, 16]
-                ];
-                return bases[playerId];
-            }
-            // Home tracks (65-72)
-            if (position >= 65 && position <= 72) {
-                const step = position - 65;
-                if (playerId === 0) return [18 - step, 10];
-                if (playerId === 1) return [10, 2 + step];
-                if (playerId === 2) return [2 + step, 10];
-                if (playerId === 3) return [10, 18 - step];
-            }
-            // Shared Perimeter Loop
-            let globalCell = (position + (playerId * 16) - 1) % 64 + 1;
-            return getGlobalPerimeterCoords(globalCell);
-        }
+function loop() {
+    if (!isAuto) return;
+    stepOnce();
+    const spd = parseInt(document.getElementById('speed').value);
+    autoTimer = setTimeout(loop, spd);
+}
 
-        function clearTokens() {
-            document.querySelectorAll(".token").forEach(t => t.remove());
-        }
+function stopAuto() {
+    isAuto = false;
+    clearTimeout(autoTimer);
+    const btn = document.getElementById('autoBtn');
+    btn.textContent = '▶ Auto Play';
+    btn.style.background = '#38a169';
+}
 
-        function drawTokens(positions) {
-            clearTokens();
-            const cellTokens = {};
-
-            for (let p_id = 0; p_id < 4; p_id++) {
-                const tokens = positions[`p${p_id}`];
-                for (let t_id = 0; t_id < 4; t_id++) {
-                    const pos = tokens[t_id];
-                    const [r, c] = getGridCoords(p_id, pos);
-                    const key = `${r}-${c}`;
-                    
-                    if (!cellTokens[key]) cellTokens[key] = [];
-                    cellTokens[key].push({ p_id, t_id, pos });
-                }
-            }
-
-            // Offset to prevent overlapping inside a single cell
-            for (let key in cellTokens) {
-                const list = cellTokens[key];
-                const total = list.length;
-                const cell = cellMap[key];
-                if (!cell) continue;
-
-                list.forEach((tok, index) => {
-                    const div = document.createElement("div");
-                    div.className = `token p${tok.p_id}`;
-                    div.innerText = `${tok.t_id}`;
-                    div.title = `Player ${tok.p_id} Token ${tok.t_id} (Cell ${tok.pos})`;
-                    
-                    if (total === 1) {
-                        div.style.left = "calc(50% - 9px)";
-                        div.style.top = "calc(50% - 9px)";
-                    } else if (total === 2) {
-                        const offsets = [-10, 10];
-                        div.style.left = `calc(50% - 9px + ${offsets[index]}px)`;
-                        div.style.top = "calc(50% - 9px)";
-                    } else {
-                        const offsetCols = [-10, 10, -10, 10];
-                        const offsetRows = [-10, -10, 10, 10];
-                        div.style.left = `calc(50% - 9px + ${offsetCols[index % 4]}px)`;
-                        div.style.top = `calc(50% - 9px + ${offsetRows[index % 4]}px)`;
-                    }
-                    
-                    cell.appendChild(div);
-                });
-            }
-        }
-
-        const logConsole = document.getElementById("logConsole");
-        function log(msg, type = "") {
-            const entry = document.createElement("div");
-            entry.className = `log-entry ${type}`;
-            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            logConsole.appendChild(entry);
-            logConsole.scrollTop = logConsole.scrollHeight;
-        }
-
-        function resetGame() {
-            stopAutoPlay();
-            stepCount = 0;
-            totalActions = 0;
-            invalidActions = 0;
-            document.getElementById("stepsVal").innerText = "0";
-            document.getElementById("adherenceVal").innerText = "100.0%";
-            document.getElementById("winnerVal").innerText = "Active";
-            document.getElementById("winnerVal").style.color = "var(--text-main)";
-            
-            log(`Resetting game. Loading Maskable PPO model...`, "header");
-            
-            fetch("/reset", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model: "masked" })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("rollVal").innerText = data.roll;
-                drawTokens(data.positions);
-                log(`Game reset. Initial Roll: ${data.roll} | Valid tokens: [${data.valid_moves}]`);
-            })
-            .catch(err => log(`Error: ${err}`, "invalid"));
-        }
-
-        function stepGame() {
-            fetch("/step", { method: "POST" })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    log(data.error, "invalid");
-                    stopAutoPlay();
-                    return;
-                }
-                
-                stepCount++;
-                totalActions++;
-                document.getElementById("stepsVal").innerText = stepCount;
-
-                log(`AI rolled ${data.action_roll} | Selected Token ${data.action_token} | Cell ${data.old_pos} -> Cell ${data.new_pos}`);
-
-                document.getElementById("rollVal").innerText = data.roll;
-                drawTokens(data.positions);
-
-                if (data.game_over) {
-                    stopAutoPlay();
-                    const winVal = document.getElementById("winnerVal");
-                    if (data.winner === 0) {
-                        winVal.innerText = "AI Won! 🏆";
-                        winVal.style.color = "var(--p0-color)";
-                        log(`🏆 GAME OVER: AI WON!`, "success");
-                    } else {
-                        winVal.innerText = `Player ${data.winner} Won`;
-                        winVal.style.color = "var(--primary-accent)";
-                        log(`💀 GAME OVER: Opponent Player ${data.winner} won.`, "invalid");
-                    }
-                }
-            })
-            .catch(err => {
-                log(`Error: ${err}`, "invalid");
-                stopAutoPlay();
-            });
-        }
-
-        function toggleAutoPlay() {
-            const btn = document.getElementById("autoBtn");
-            if (isAutoPlaying) {
-                stopAutoPlay();
-            } else {
-                isAutoPlaying = true;
-                btn.innerText = "Pause Simulation";
-                btn.className = "btn btn-secondary";
-                log("Starting auto play...", "header");
-                autoPlayLoop();
-            }
-        }
-
-        function stopAutoPlay() {
-            isAutoPlaying = false;
-            const btn = document.getElementById("autoBtn");
-            if (btn) {
-                btn.innerText = "Auto Play";
-                btn.className = "btn btn-success";
-            }
-            if (autoPlayTimer) {
-                clearTimeout(autoPlayTimer);
-                autoPlayTimer = null;
-            }
-        }
-
-        function autoPlayLoop() {
-            if (!isAutoPlaying) return;
-            stepGame();
-            autoPlayTimer = setTimeout(autoPlayLoop, speed);
-        }
-
-        function updateSpeed() {
-            speed = parseInt(document.getElementById("speedSlider").value);
-            document.getElementById("speedVal").innerText = `${speed}ms`;
-        }
-
-        buildBoardGrid();
-        resetGame();
-    </script>
+// Build grid and start
+buildGrid();
+resetGame();
+</script>
 </body>
 </html>
