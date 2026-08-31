@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kori Khel - RL AI Interactive Board Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Kori Khel - AI Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0c0e14;
-            --card-bg: rgba(22, 28, 41, 0.7);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --primary-accent: #ff4757;
-            --p0-color: #2ed573;
-            --p1-color: #ff4757;
-            --p2-color: #ffa502;
-            --p3-color: #9b59b6;
-            --text-main: #f1f2f6;
-            --text-mute: #a4b0be;
+            --bg-color: #f7f9fc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary-accent: #d32f2f; /* Deep red matching the physical board lines */
+            --p0-color: #38a169; /* Soft green */
+            --p1-color: #e53e3e; /* Soft red */
+            --p2-color: #dd6b20; /* Soft orange */
+            --p3-color: #805ad5; /* Soft purple */
+            --text-main: #2d3748;
+            --text-mute: #718096;
+            --grid-line-color: #d32f2f;
         }
 
         * {
@@ -33,33 +34,33 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
         }
 
         header {
-            background: rgba(12, 14, 20, 0.9);
-            backdrop-filter: blur(10px);
+            background: #ffffff;
             border-bottom: 1px solid var(--border-color);
-            padding: 1.2rem 2rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         header h1 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            background: linear-gradient(45deg, #ff4757, #ffa502);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
-        .header-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-mute);
-            font-weight: 400;
+        .status-badge {
+            font-weight: 600;
+            color: var(--p0-color);
+            border: 1px solid var(--p0-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            background: rgba(56, 161, 105, 0.05);
         }
 
         .main-container {
@@ -67,25 +68,25 @@
             flex: 1;
             padding: 2rem;
             gap: 2rem;
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            align-items: stretch;
         }
 
         /* LEFT COLUMN: Board Visualization */
         .board-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 1.5rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
             flex: 1.2;
-            min-width: 550px;
             aspect-ratio: 1;
+            min-width: 500px;
         }
 
         /* 19x19 Board Grid */
@@ -95,75 +96,75 @@
             grid-template-rows: repeat(19, 1fr);
             width: 100%;
             height: 100%;
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            background: #111622;
+            background: transparent;
             position: relative;
-            border-radius: 12px;
-            overflow: hidden;
         }
 
+        /* Inactive cell default style: invisible */
         .cell {
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            border: none;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            font-weight: 600;
-            font-size: 0.75rem;
         }
 
-        /* Red border grid lines for active arm paths to match physical board */
+        /* Active path arm cells: clean white back, solid red border matching physical layout */
         .cell.active-path {
-            border: 1.5px solid rgba(255, 71, 87, 0.5);
-            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--grid-line-color);
+            background: #ffffff;
         }
 
-        /* Home Tracks Columns Shading */
-        .cell.home-p0 { background: rgba(46, 213, 115, 0.15); }
-        .cell.home-p1 { background: rgba(255, 71, 87, 0.15); }
-        .cell.home-p2 { background: rgba(255, 165, 2, 0.15); }
-        .cell.home-p3 { background: rgba(155, 89, 182, 0.15); }
+        /* Shaded Home Track columns */
+        .cell.home-p0 { background: rgba(56, 161, 105, 0.08); }
+        .cell.home-p1 { background: rgba(229, 62, 62, 0.08); }
+        .cell.home-p2 { background: rgba(221, 107, 32, 0.08); }
+        .cell.home-p3 { background: rgba(128, 90, 213, 0.08); }
 
-        /* Goal (Paka) 3x3 Center Block */
-        .cell.goal-area {
-            background: linear-gradient(135deg, rgba(255, 165, 2, 0.25), rgba(255, 71, 87, 0.25));
-            border: 2px solid rgba(255, 165, 2, 0.6);
-            color: #ffa502;
-            font-weight: 800;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(255, 165, 2, 0.5);
-        }
-
-        /* Safe Zones (Marked with X inside) */
+        /* Safe Zones (Marked with X) */
         .cell.safe-zone::before {
             content: "✕";
             position: absolute;
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 1.1rem;
-            font-weight: 400;
+            color: #2d3748;
+            font-size: 1rem;
+            font-weight: 500;
             pointer-events: none;
         }
 
-        /* Bases (Corner Blocks for each player) */
+        /* Goal (Paka) 3x3 Center Block */
+        .cell.goal-area {
+            background: #ffffff;
+            border: 1px solid var(--grid-line-color);
+            color: var(--grid-line-color);
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        
+        /* Middle goal center text cell */
+        .cell.goal-center {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--primary-accent);
+            background: rgba(211, 47, 47, 0.05);
+        }
+
+        /* Corner Base zones */
         .base-zone {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             border-radius: 8px;
-            padding: 0.5rem;
-            gap: 5px;
             font-size: 0.8rem;
             font-weight: 600;
         }
-        .base-p0 { background: rgba(46, 213, 115, 0.05); border: 1px dashed rgba(46, 213, 115, 0.3); }
-        .base-p1 { background: rgba(255, 71, 87, 0.05); border: 1px dashed rgba(255, 71, 87, 0.3); }
-        .base-p2 { background: rgba(255, 165, 2, 0.05); border: 1px dashed rgba(255, 165, 2, 0.3); }
-        .base-p3 { background: rgba(155, 89, 182, 0.05); border: 1px dashed rgba(155, 89, 182, 0.3); }
+        .base-p0 { background: rgba(56, 161, 105, 0.05); border: 1px dashed rgba(56, 161, 105, 0.25); color: var(--p0-color); }
+        .base-p1 { background: rgba(229, 62, 62, 0.05); border: 1px dashed rgba(229, 62, 62, 0.25); color: var(--p1-color); }
+        .base-p2 { background: rgba(221, 107, 32, 0.05); border: 1px dashed rgba(221, 107, 32, 0.25); color: var(--p2-color); }
+        .base-p3 { background: rgba(128, 90, 213, 0.05); border: 1px dashed rgba(128, 90, 213, 0.25); color: var(--p3-color); }
 
-        /* Tokens (Colored circles) */
+        /* Tokens */
         .token {
             width: 18px;
             height: 18px;
@@ -171,63 +172,44 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #000;
             font-size: 0.6rem;
             font-weight: 800;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            border: 1.5px solid #ffffff;
+            transition: all 0.25s ease;
             position: absolute;
             z-index: 5;
         }
 
-        .token.p0 { background-color: var(--p0-color); color: #000; }
-        .token.p1 { background-color: var(--p1-color); color: #fff; }
-        .token.p2 { background-color: var(--p2-color); color: #000; }
-        .token.p3 { background-color: var(--p3-color); color: #fff; }
+        .token.p0 { background-color: var(--p0-color); color: #ffffff; }
+        .token.p1 { background-color: var(--p1-color); color: #ffffff; }
+        .token.p2 { background-color: var(--p2-color); color: #ffffff; }
+        .token.p3 { background-color: var(--p3-color); color: #ffffff; }
 
-        /* RIGHT COLUMN: Control and Log Console */
+        /* RIGHT COLUMN: Control Panel */
         .control-column {
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
             flex: 0.8;
-            min-width: 400px;
+            min-width: 380px;
         }
 
         .control-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 1.8rem;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         }
 
         .card-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 1.2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Interactive Select and Buttons */
-        .form-select {
-            background: #19202e;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            width: 100%;
             margin-bottom: 1rem;
-            outline: none;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-        .form-select:focus {
-            border-color: var(--primary-accent);
+            color: var(--text-main);
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 8px;
         }
 
         .btn-group {
@@ -238,9 +220,9 @@
 
         .btn {
             flex: 1;
-            padding: 0.8rem 1rem;
-            border-radius: 10px;
-            font-size: 0.95rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             outline: none;
@@ -249,139 +231,122 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #ff4757, #ff6b81);
-            color: #fff;
+            background: #3182ce;
+            color: #ffffff;
         }
         .btn-primary:hover {
-            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.35);
-            transform: translateY(-2px);
+            background: #2b6cb0;
         }
 
         .btn-secondary {
-            background: #2f3542;
+            background: #edf2f7;
             color: var(--text-main);
+            border: 1px solid #cbd5e0;
         }
         .btn-secondary:hover {
-            background: #3e4450;
+            background: #e2e8f0;
         }
 
         .btn-success {
-            background: linear-gradient(45deg, #2ed573, #7bed9f);
-            color: #fff;
+            background: #38a169;
+            color: #ffffff;
         }
         .btn-success:hover {
-            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.35);
-            transform: translateY(-2px);
+            background: #2f855a;
         }
 
-        /* Stats Section */
+        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 1rem;
+            gap: 12px;
         }
 
         .stat-box {
-            background: #141a27;
-            border-radius: 10px;
-            padding: 0.8rem 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            background: #f7f9fc;
+            border-radius: 8px;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid var(--border-color);
             text-align: center;
         }
 
         .stat-label {
             font-size: 0.75rem;
             color: var(--text-mute);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .stat-value {
-            font-size: 1.1rem;
-            font-weight: 800;
+            font-size: 1.05rem;
+            font-weight: 700;
         }
         .stat-value.accent { color: var(--primary-accent); }
         .stat-value.success { color: var(--p0-color); }
 
-        /* Logger Terminal Output */
+        /* Logger Output */
         .log-terminal {
-            background: #080a0e;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 1rem;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem;
             font-family: monospace;
-            font-size: 0.82rem;
-            height: 250px;
+            font-size: 0.8rem;
+            height: 220px;
             overflow-y: auto;
-            color: #7bed9f;
+            color: #334155;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+            gap: 6px;
         }
 
         .log-entry {
-            line-height: 1.4;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            padding-bottom: 4px;
+            line-height: 1.35;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 3px;
         }
 
-        .log-entry.invalid { color: #ff4757; }
-        .log-entry.success { color: #2ed573; font-weight: bold; }
-        .log-entry.header { color: #ffa502; font-weight: bold; }
+        .log-entry.invalid { color: #e53e3e; }
+        .log-entry.success { color: #38a169; font-weight: bold; }
+        .log-entry.header { color: #dd6b20; font-weight: bold; }
 
-        /* Autoplay slider container */
         .slider-container {
             margin-top: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-mute);
         }
 
         .slider {
             flex: 1;
             margin-left: 10px;
-            accent-color: var(--primary-accent);
+            accent-color: #3182ce;
         }
     </style>
 </head>
 <body>
     <header>
-        <div>
-            <h1>Kori Khel</h1>
-            <div class="header-subtitle">Reinforcement Learning Visual Agent Watch Dashboard</div>
-        </div>
-        <div style="font-weight: bold; color: var(--p0-color); border: 1px solid var(--p0-color); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; background: rgba(46, 213, 115, 0.05);">
-            Dibrugarh University FYP
-        </div>
+        <h1>Kori Khel AI Visualizer</h1>
+        <span class="status-badge">Maskable PPO Agent</span>
     </header>
 
     <div class="main-container">
         <!-- LEFT: Board Card -->
         <div class="board-card">
             <div class="board-grid" id="boardGrid">
-                <!-- Cells will be dynamically generated by Javascript -->
+                <!-- Cells generated by Javascript -->
             </div>
         </div>
 
-        <!-- RIGHT: Control and logs -->
+        <!-- RIGHT: Control Column -->
         <div class="control-column">
             <div class="control-card">
-                <div class="card-title">
-                    <span>AI Model Configuration</span>
-                    <span id="modelBadge" style="font-size: 0.75rem; background: var(--primary-accent); padding: 2px 8px; border-radius: 10px; font-weight: 800;">MASKED</span>
-                </div>
-                
-                <select class="form-select" id="modelSelect" onchange="resetGame()">
-                    <option value="masked">Maskable PPO (Masked Model - 100% Rule Adherent)</option>
-                    <option value="unmasked">Standard PPO (Unmasked Model - Penalty Baseline)</option>
-                </select>
+                <div class="card-title">AI Simulation Controls</div>
 
                 <div class="btn-group">
                     <button class="btn btn-secondary" onclick="resetGame()">Reset Game</button>
@@ -416,7 +381,7 @@
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">Winner Status</div>
-                        <div class="stat-value" id="winnerVal" style="font-size:0.9rem; font-weight:bold;">Active</div>
+                        <div class="stat-value" id="winnerVal" style="font-size:0.85rem; font-weight:bold;">Active</div>
                     </div>
                 </div>
             </div>
@@ -438,9 +403,8 @@
         let invalidActions = 0;
         let speed = 800;
 
-        // Initialize 19x19 Grid cells
         const grid = document.getElementById("boardGrid");
-        const cellMap = {}; // Key: "row-col", Value: cell element
+        const cellMap = {};
 
         function buildBoardGrid() {
             grid.innerHTML = "";
@@ -451,7 +415,6 @@
                     cell.style.gridRowStart = r;
                     cell.style.gridColStart = c;
                     
-                    // Mark active paths (the Cruciform Grid layout matches physical board)
                     let isActive = false;
                     
                     // Bottom Arm: cols 9, 10, 11 | rows 12 to 19
@@ -465,7 +428,10 @@
                     // Goal Center Square: rows 9-11, cols 9-11
                     if (r >= 9 && r <= 11 && c >= 9 && c <= 11) {
                         cell.classList.add("goal-area");
-                        if (r === 10 && c === 10) cell.innerText = "PAKA";
+                        if (r === 10 && c === 10) {
+                            cell.classList.add("goal-center");
+                            cell.innerText = "PAKA";
+                        }
                     }
 
                     if (isActive) {
@@ -477,42 +443,22 @@
                         if (c === 10 && r >= 2 && r <= 8) cell.classList.add("home-p2");
                         if (r === 10 && c >= 12 && c <= 18) cell.classList.add("home-p3");
                         
-                        // Adding Safe Zones 'X' symbols (verified coordinates)
-                        // Bottom arm Row 3 sides & tip
-                        if ((r === 14 && c === 9) || (r === 14 && c === 11) || (r === 19 && c === 10)) cell.classList.add("safe-zone");
-                        // Left arm Row 3 sides & tip
-                        if ((r === 9 && c === 3) || (r === 11 && c === 3) || (r === 10 && c === 1)) cell.classList.add("safe-zone");
-                        // Top arm Row 3 sides & tip
-                        if ((r === 6 && c === 9) || (r === 6 && c === 11) || (r === 1 && c === 10)) cell.classList.add("safe-zone");
-                        // Right arm Row 3 sides & tip
-                        if ((r === 9 && c === 17) || (r === 11 && c === 17) || (r === 10 && c === 19)) cell.classList.add("safe-zone");
+                        // Safe Zones 'X' symbols (verified physically: Row 5 on sides, Row 8 on middle tip)
+                        // Bottom arm (Rows 12 to 19)
+                        if ((r === 16 && c === 9) || (r === 16 && c === 11) || (r === 19 && c === 10)) cell.classList.add("safe-zone");
+                        // Left arm (Cols 1 to 8)
+                        if ((r === 9 && c === 4) || (r === 11 && c === 4) || (r === 10 && c === 1)) cell.classList.add("safe-zone");
+                        // Top arm (Rows 1 to 8)
+                        if ((r === 4 && c === 9) || (r === 4 && c === 11) || (r === 1 && c === 10)) cell.classList.add("safe-zone");
+                        // Right arm (Cols 12 to 19)
+                        if ((r === 9 && c === 16) || (r === 11 && c === 16) || (r === 10 && c === 19)) cell.classList.add("safe-zone");
                     }
 
-                    // Render player bases in corners
-                    // Bottom-left quadrant: Player 0 Base
-                    if (r === 16 && c === 4) {
-                        cell.classList.add("base-zone", "base-p0");
-                        cell.id = "base-p0";
-                        cell.innerText = "P0 Base";
-                    }
-                    // Top-left quadrant: Player 1 Base
-                    if (r === 4 && c === 4) {
-                        cell.classList.add("base-zone", "base-p1");
-                        cell.id = "base-p1";
-                        cell.innerText = "P1 Base";
-                    }
-                    // Top-right quadrant: Player 2 Base
-                    if (r === 4 && c === 16) {
-                        cell.classList.add("base-zone", "base-p2");
-                        cell.id = "base-p2";
-                        cell.innerText = "P2 Base";
-                    }
-                    // Bottom-right quadrant: Player 3 Base
-                    if (r === 16 && c === 16) {
-                        cell.classList.add("base-zone", "base-p3");
-                        cell.id = "base-p3";
-                        cell.innerText = "P3 Base";
-                    }
+                    // Bases (Player corners)
+                    if (r === 16 && c === 4) { cell.classList.add("base-zone", "base-p0"); cell.innerText = "P0 Base"; }
+                    if (r === 4 && c === 4) { cell.classList.add("base-zone", "base-p1"); cell.innerText = "P1 Base"; }
+                    if (r === 4 && c === 16) { cell.classList.add("base-zone", "base-p2"); cell.innerText = "P2 Base"; }
+                    if (r === 16 && c === 16) { cell.classList.add("base-zone", "base-p3"); cell.innerText = "P3 Base"; }
 
                     grid.appendChild(cell);
                     cellMap[`${r}-${c}`] = cell;
@@ -538,26 +484,24 @@
             if (cell >= 49 && cell <= 56) return [11, 12 + (cell - 49)];
             if (cell >= 57 && cell <= 64) return [9, 19 - (cell - 57)];
             
-            return [10, 10]; // fallback
+            return [10, 10];
         }
 
-        // Map token position (0-73) for player (0-3) to (row, col) coordinates
+        // Map token position (0-73) for player (0-3) to (row, col)
         function getGridCoords(playerId, position) {
             if (position === 73) {
-                // Goal center square offsets
                 const offsets = [
                     [10, 10], [9, 10], [10, 9], [11, 10]
                 ];
                 return offsets[playerId];
             }
             if (position === 0) {
-                // Player bases
                 const bases = [
                     [16, 4], [4, 4], [4, 16], [16, 16]
                 ];
                 return bases[playerId];
             }
-            // Home column paths (65-72)
+            // Home tracks (65-72)
             if (position >= 65 && position <= 72) {
                 const step = position - 65;
                 if (playerId === 0) return [18 - step, 10];
@@ -565,21 +509,17 @@
                 if (playerId === 2) return [2 + step, 10];
                 if (playerId === 3) return [10, 18 - step];
             }
-            // Shared Loop perimeter
+            // Shared Perimeter Loop
             let globalCell = (position + (playerId * 16) - 1) % 64 + 1;
             return getGlobalPerimeterCoords(globalCell);
         }
 
-        // Clear all tokens from grid
         function clearTokens() {
             document.querySelectorAll(".token").forEach(t => t.remove());
         }
 
-        // Render positions of all tokens on board grid
         function drawTokens(positions) {
             clearTokens();
-            
-            // Dictionary to track token overlaps (cells having multiple tokens)
             const cellTokens = {};
 
             for (let p_id = 0; p_id < 4; p_id++) {
@@ -589,14 +529,12 @@
                     const [r, c] = getGridCoords(p_id, pos);
                     const key = `${r}-${c}`;
                     
-                    if (!cellTokens[key]) {
-                        cellTokens[key] = [];
-                    }
+                    if (!cellTokens[key]) cellTokens[key] = [];
                     cellTokens[key].push({ p_id, t_id, pos });
                 }
             }
 
-            // Draw tokens with offset calculations to prevent overlapping
+            // Offset to prevent overlapping inside a single cell
             for (let key in cellTokens) {
                 const list = cellTokens[key];
                 const total = list.length;
@@ -609,7 +547,6 @@
                     div.innerText = `${tok.t_id}`;
                     div.title = `Player ${tok.p_id} Token ${tok.t_id} (Cell ${tok.pos})`;
                     
-                    // Offset calculations inside grid cell
                     if (total === 1) {
                         div.style.left = "calc(50% - 9px)";
                         div.style.top = "calc(50% - 9px)";
@@ -618,7 +555,6 @@
                         div.style.left = `calc(50% - 9px + ${offsets[index]}px)`;
                         div.style.top = "calc(50% - 9px)";
                     } else {
-                        // Matrix arrangement for 3 or 4 tokens inside the same cell
                         const offsetCols = [-10, 10, -10, 10];
                         const offsetRows = [-10, -10, 10, 10];
                         div.style.left = `calc(50% - 9px + ${offsetCols[index % 4]}px)`;
@@ -630,7 +566,6 @@
             }
         }
 
-        // Logger helper
         const logConsole = document.getElementById("logConsole");
         function log(msg, type = "") {
             const entry = document.createElement("div");
@@ -640,7 +575,6 @@
             logConsole.scrollTop = logConsole.scrollHeight;
         }
 
-        // Reset Game request
         function resetGame() {
             stopAutoPlay();
             stepCount = 0;
@@ -651,35 +585,22 @@
             document.getElementById("winnerVal").innerText = "Active";
             document.getElementById("winnerVal").style.color = "var(--text-main)";
             
-            const model = document.getElementById("modelSelect").value;
-            
-            // Update badge style
-            const badge = document.getElementById("modelBadge");
-            if (model === "masked") {
-                badge.innerText = "MASKED";
-                badge.style.background = "var(--p0-color)";
-            } else {
-                badge.innerText = "UNMASKED";
-                badge.style.background = "var(--primary-accent)";
-            }
-
-            log(`Resetting game. Loading ${model.toUpperCase()} model...`, "header");
+            log(`Resetting game. Loading Maskable PPO model...`, "header");
             
             fetch("/reset", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ model: model })
+                body: JSON.stringify({ model: "masked" })
             })
             .then(res => res.json())
             .then(data => {
                 document.getElementById("rollVal").innerText = data.roll;
                 drawTokens(data.positions);
-                log(`Game reset. Initial Roll: ${data.roll} | Valid tokens to move: [${data.valid_moves}]`);
+                log(`Game reset. Initial Roll: ${data.roll} | Valid tokens: [${data.valid_moves}]`);
             })
-            .catch(err => log(`Error resetting environment: ${err}`, "invalid"));
+            .catch(err => log(`Error: ${err}`, "invalid"));
         }
 
-        // Next Step / AI Action request
         function stepGame() {
             fetch("/step", { method: "POST" })
             .then(res => res.json())
@@ -694,20 +615,10 @@
                 totalActions++;
                 document.getElementById("stepsVal").innerText = stepCount;
 
-                // Logging details
-                if (data.is_invalid) {
-                    invalidActions++;
-                    log(`AI tried to move Token ${data.action_token} (ILLEGAL MOVE!) | Penalty: -2.0`, "invalid");
-                } else {
-                    log(`AI rolled ${data.action_roll} | Selected Token ${data.action_token} | Cell ${data.old_pos} -> Cell ${data.new_pos} | Reward: ${data.reward.toFixed(2)}`);
-                }
+                log(`AI rolled ${data.action_roll} | Selected Token ${data.action_token} | Cell ${data.old_pos} -> Cell ${data.new_pos}`);
 
-                // Update metrics
                 document.getElementById("rollVal").innerText = data.roll;
                 drawTokens(data.positions);
-                
-                let adherence = ((totalActions - invalidActions) / totalActions) * 100;
-                document.getElementById("adherenceVal").innerText = `${adherence.toFixed(1)}%`;
 
                 if (data.game_over) {
                     stopAutoPlay();
@@ -715,21 +626,20 @@
                     if (data.winner === 0) {
                         winVal.innerText = "AI Won! 🏆";
                         winVal.style.color = "var(--p0-color)";
-                        log(`🏆 GAME OVER: AI (Player 0) WON the match!`, "success");
+                        log(`🏆 GAME OVER: AI WON!`, "success");
                     } else {
                         winVal.innerText = `Player ${data.winner} Won`;
                         winVal.style.color = "var(--primary-accent)";
-                        log(`💀 GAME OVER: Opponent Player ${data.winner} won the match.`, "invalid");
+                        log(`💀 GAME OVER: Opponent Player ${data.winner} won.`, "invalid");
                     }
                 }
             })
             .catch(err => {
-                log(`Error executing steps: ${err}`, "invalid");
+                log(`Error: ${err}`, "invalid");
                 stopAutoPlay();
             });
         }
 
-        // Autoplay loop
         function toggleAutoPlay() {
             const btn = document.getElementById("autoBtn");
             if (isAutoPlaying) {
@@ -738,7 +648,7 @@
                 isAutoPlaying = true;
                 btn.innerText = "Pause Simulation";
                 btn.className = "btn btn-secondary";
-                log("Starting auto play simulation...", "header");
+                log("Starting auto play...", "header");
                 autoPlayLoop();
             }
         }
@@ -767,7 +677,6 @@
             document.getElementById("speedVal").innerText = `${speed}ms`;
         }
 
-        // Build grid on page load
         buildBoardGrid();
         resetGame();
     </script>

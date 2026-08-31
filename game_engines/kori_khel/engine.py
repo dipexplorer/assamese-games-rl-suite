@@ -41,10 +41,10 @@ def coords_to_global_pos(arm_id, side, row):
 # Programmatically generate safe zones using verified physical coordinates
 GLOBAL_SAFE_ZONES = []
 for arm in range(NUM_PLAYERS):
-    # Rule: X marks are at Row 3 on both side columns, and Row 8 at the middle column tip
-    GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'right', 3))   # Row 3 Right Column
+    # Rule: X marks are at Row 5 on both side columns, and Row 8 at the middle column tip
+    GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'right', 5))   # Row 5 Right Column
     GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'middle', 8))  # Row 8 Middle Column (Tip)
-    GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'left', 3))    # Row 3 Left Column
+    GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'left', 5))    # Row 5 Left Column
 
 # Sort for consistency
 GLOBAL_SAFE_ZONES.sort()
