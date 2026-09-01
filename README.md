@@ -1,56 +1,81 @@
-# Computational Formalization & RL Suite for Assamese Traditional Games
+# Assamese Traditional Games RL Suite
 
-**Final Year Project** | Department of Information Technology, Gauhati University | 2026  
-**Target Submission:** IndoML 2026 (7th Indian Symposium on Machine Learning) — Undergraduate Forum
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> A systematic computational framework to formalize traditional Assamese games into OpenAI Gymnasium environments and benchmark Reinforcement Learning algorithms.
+**Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games.**
 
----
+This repository contains the codebase for our ongoing research to map indigenous, asymmetric multi-agent games of Assam into standard Markov Decision Process (MDP) frameworks. The project provides `OpenAI Gymnasium` environments to benchmark policy gradient algorithms (like PPO) against complex topological constraints and skewed stochastic mechanics that are absent in standard Western board game benchmarks (like Chess or Go).
 
-## 🎮 Suite Games & Status
-
-| Game | Domain / Dynamics | Status | RL Benchmark | Win Rate |
-| :--- | :--- | :---: | :---: | :---: |
-| **Kori Khel** (কড়ি খেল) | Stochastic 4-Player Board | 🟢 **Complete** | Maskable PPO | **30.00%** (100% Legal Play) |
-| **Dhop Khel** (ঢোপ খেল) | Multi-Agent Pursuit & Tagging | 🟡 In Formalization | TBD | Pending |
-| **Tekeli Bhonga** (টেকেলী ভঙa) | POMDP Spatial Awareness | 🟡 In Formalization | TBD | Pending |
-| **Koni Juj** (কণী যুঁজ) | Discrete Collision Mechanics | 🟡 In Formalization | TBD | Pending |
-| **Ha-Doo-Doo** (হা-ডু-ডু) | Continuous Territory Control | 🟡 In Formalization | TBD | Pending |
+*This project is targeting the **IndoML 2026 (Undergraduate Forum)**.*
 
 ---
 
-## 📁 Architecture (Modular 5-Game Layered Design)
+## 🕹️ Current Environments
 
+### 1. Kori Khel (`KoriKhelEnv-v0`)
+A 4-player stochastic cowrie-shell race game featuring a 73-state continuous track per player, asymmetric binomial dice rolls (where $P(\text{Jagowa}) \approx 9.38\%$), safe-zone sanctuaries, and capture mechanics.
+
+**Key RL Challenge:** The strict entry constraint (requiring an exact roll of 10 to leave the Base) creates a severe action bottleneck. Standard PPO fails to learn legal play (46% rule adherence) due to this penalty minimum, making Kori Khel a highly effective testbed for **invalid action masking**. 
+
+*Our Maskable PPO baseline achieves 100% legal play and a 30% win rate against a 4-player random baseline.*
+
+## 🚀 Installation
+
+Clone the repository and install the required dependencies:
+
+```bash
+git clone https://github.com/dipexplorer/assamese-games-rl-suite.git
+cd assamese-games-rl-suite
+
+# It is recommended to use a virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+
+pip install -r requirements.txt
 ```
-PROJECT/
-├── game_engines/    ← Pure Python game logic (kori_khel, dhop_khel, etc.)
-├── environments/    ← OpenAI Gymnasium wrappers (KoriKhelEnv, etc.)
-├── training/        ← Training pipelines (train_maskable_ppo.py)
-├── agents/          ← Saved trained model weights (.zip)
-├── evaluation/      ← 100-game benchmark scripts & win-rate metrics
-├── visualization/   ← Flask Web Dashboard (Multi-game Hub & interactive boards)
-├── docs/            ← IndoML 2026 2-Page Extended Abstract (.tex / .md) & rulebooks
-├── tests/           ← Unit tests for mechanics and state transitions
-└── experiments/     ← Training logs & Tensorboard events
+
+## 🎮 Running the Environments
+
+### 1. Training the Maskable PPO Baseline
+To train the Maskable PPO agent on the Kori Khel environment:
+```bash
+python -m training.kori_khel.train_maskable
 ```
 
----
-
-## 🚀 Quick Start
-
-### 1. Run Interactive Web Visualizer
+### 2. Launching the Interactive Web UI
+We provide a Flask-based interactive web board to visualize agent evaluation in real-time.
 ```bash
 python visualization/gui_server.py
 ```
-Open `http://localhost:5000` in your browser to launch the Multi-Game Hub or play Kori Khel live!
+Then navigate to `http://127.0.0.1:5000` in your browser.
 
-### 2. Train Maskable PPO Agent (1M Steps)
-```bash
-.venv/bin/python training/kori_khel/train_maskable_ppo.py
+## 🗺️ Roadmap (Future Modules)
+
+This suite is being actively developed. The following games are slated for future formalization:
+
+- **[In Progress] Dhop Khel (ঢোপ খেল):** Transitioning from discrete board MDPs to continuous 2D spatial coordinate systems with multi-agent ball-possession and tagging dynamics under partial observability.
+- **Tekeli Bhonga (টেকেলী ভঙা):** Spatial awareness and precision targeting game modeling POMDP spatial navigation constraints.
+- **Koni Juj (কণী যুঁজ):** Tactical collision MDP testing shell structural integrity prediction.
+- **Ha-Doo-Doo (হা-ডু-ডু):** High-density continuous territory-control modeling breath-duration constraint tagging.
+
+## 📖 Citation
+
+If you use these environments or baselines in your research, please cite our IndoML 2026 paper:
+
+```bibtex
+@inproceedings{das2026korikhel,
+  title={Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel},
+  author={Das, Dipjyoti and Sharma, Simanata and Bhattacharyya, Rupam},
+  booktitle={7th Indian Symposium on Machine Learning (IndoML) - Undergraduate Forum},
+  year={2026},
+  address={Kolkata, India}
+}
 ```
 
-### 3. Run Benchmark Evaluation
-```bash
-.venv/bin/python evaluation/kori_khel/evaluate_maskable_ppo.py
-```
+## 👨‍💻 Authors & Affiliation
+- **Dipjyoti Das**
+- **Simanta Sharma**
+- **Rupam Bhattacharyya (Advisor)**
 
+*Department of Information Technology, Gauhati University, Assam, India*
