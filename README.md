@@ -1,67 +1,62 @@
-# Assamese Traditional Games RL Suite
+# Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+This repository contains the official implementation of the computational formalization and OpenAI Gymnasium environments for Assamese traditional games. The codebase establishes baseline reinforcement learning (RL) policies for these environments, currently focusing on Kori Khel. 
 
-**Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games.**
+This work is intended for the **IndoML 2026 Undergraduate Forum**.
 
-This repository contains the codebase for our ongoing research to map indigenous, asymmetric multi-agent games of Assam into standard Markov Decision Process (MDP) frameworks. The project provides `OpenAI Gymnasium` environments to benchmark policy gradient algorithms (like PPO) against complex topological constraints and skewed stochastic mechanics that are absent in standard Western board game benchmarks (like Chess or Go).
+## Overview
 
-*This project is targeting the **IndoML 2026 (Undergraduate Forum)**.*
+Standard RL benchmark suites predominantly feature Western board games. Indigenous multi-agent games, characterized by asymmetric stochastic dynamics and complex topological constraints, remain largely unmodeled. This repository provides:
 
----
+1. **`KoriKhelEnv-v0`**: A 73-state 1D Markov Decision Process (MDP) implementation of the 4-player cowrie-shell game Kori Khel.
+2. **Policy Gradient Baselines**: Training and evaluation scripts for Proximal Policy Optimization (PPO).
+3. **Action Masking**: Implementations addressing severe action-space bottlenecks caused by strict game entry rules.
 
-## 🕹️ Current Environments
+Empirical results demonstrate that standard PPO fails to learn legal play (46% rule adherence) due to entry-state penalty minima, whereas Maskable PPO achieves 100% rule adherence and a 30% win rate against a uniform random baseline.
 
-### 1. Kori Khel (`KoriKhelEnv-v0`)
-A 4-player stochastic cowrie-shell race game featuring a 73-state continuous track per player, asymmetric binomial dice rolls (where $P(\text{Jagowa}) \approx 9.38\%$), safe-zone sanctuaries, and capture mechanics.
+## Installation
 
-**Key RL Challenge:** The strict entry constraint (requiring an exact roll of 10 to leave the Base) creates a severe action bottleneck. Standard PPO fails to learn legal play (46% rule adherence) due to this penalty minimum, making Kori Khel a highly effective testbed for **invalid action masking**. 
-
-*Our Maskable PPO baseline achieves 100% legal play and a 30% win rate against a 4-player random baseline.*
-
-## 🚀 Installation
-
-Clone the repository and install the required dependencies:
+The codebase requires Python 3.10 or higher. It is recommended to use an isolated virtual environment.
 
 ```bash
 git clone https://github.com/dipexplorer/assamese-games-rl-suite.git
 cd assamese-games-rl-suite
 
-# It is recommended to use a virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 pip install -r requirements.txt
 ```
 
-## 🎮 Running the Environments
+## Usage
 
-### 1. Training the Maskable PPO Baseline
+### 1. Training Baselines
 To train the Maskable PPO agent on the Kori Khel environment:
+
 ```bash
 python -m training.kori_khel.train_maskable
 ```
+Training logs are output to `training/kori_khel/logs_maskable/` and can be visualized using TensorBoard.
 
-### 2. Launching the Interactive Web UI
-We provide a Flask-based interactive web board to visualize agent evaluation in real-time.
+### 2. Environment Visualization
+The repository includes a Flask-based board renderer for agent evaluation and policy visualization.
+
 ```bash
 python visualization/gui_server.py
 ```
-Then navigate to `http://127.0.0.1:5000` in your browser.
+Access the rendering interface at `http://127.0.0.1:5000`.
 
-## 🗺️ Roadmap (Future Modules)
+## Future Work
 
-This suite is being actively developed. The following games are slated for future formalization:
+The formalization framework is actively being extended to other regional games, including:
+- **Dhop Khel**: Transitioning to continuous 2D spatial coordinate systems with multi-agent tagging dynamics.
+- **Tekeli Bhonga**: POMDP spatial navigation constraints under partial observability.
+- **Koni Juj**: Discrete collision MDPs for structural integrity prediction.
+- **Ha-Doo-Doo**: Continuous territory-control modeling.
 
-- **[In Progress] Dhop Khel (ঢোপ খেল):** Transitioning from discrete board MDPs to continuous 2D spatial coordinate systems with multi-agent ball-possession and tagging dynamics under partial observability.
-- **Tekeli Bhonga (টেকেলী ভঙা):** Spatial awareness and precision targeting game modeling POMDP spatial navigation constraints.
-- **Koni Juj (কণী যুঁজ):** Tactical collision MDP testing shell structural integrity prediction.
-- **Ha-Doo-Doo (হা-ডু-ডু):** High-density continuous territory-control modeling breath-duration constraint tagging.
+## Citation
 
-## 📖 Citation
-
-If you use these environments or baselines in your research, please cite our IndoML 2026 paper:
+If you utilize this codebase or environment in your research, please cite the associated paper:
 
 ```bibtex
 @inproceedings{das2026korikhel,
@@ -73,7 +68,7 @@ If you use these environments or baselines in your research, please cite our Ind
 }
 ```
 
-## 👨‍💻 Authors & Affiliation
+## Authors
 - **Dipjyoti Das**
 - **Simanta Sharma**
 - **Rupam Bhattacharyya (Advisor)**
