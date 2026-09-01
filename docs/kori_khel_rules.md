@@ -29,8 +29,8 @@ At each turn, a player throws 6 cowrie shells. The number of shells that land fa
 | **3 Uburi** | - | 3 | ❌ NO | ~31.3% |
 | **4 Uburi** | - | 4 | ❌ NO | ~23.4% |
 | **5 Uburi** | Pachi | 25 | ✅ YES | ~9.4% |
-| **6 Uburi** | Full Marks | 6 | ✅ YES | ~1.6% |
-| **0 Uburi** (6 Chit) | Mudra | 6 | ✅ YES | ~1.6% |
+| **6 Uburi** | Full Marks | 6 | ❌ NO | ~1.6% |
+| **0 Uburi** (6 Open) | Mudra | 12 | ✅ YES | ~1.6% |
 
 ---
 

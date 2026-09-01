@@ -41,6 +41,7 @@ class KoriKhelEnv(gym.Env):
         self.engine = None
         self.current_roll = 0
         self.bonus_turn = False
+        self.turn_history = []  # Added to track intermediate moves for UI
 
     def _get_obs(self):
         """Helper to build the symmetric observation vector for Player 0."""
@@ -82,7 +83,6 @@ class KoriKhelEnv(gym.Env):
         # Roll kori for the agent
         self.current_roll, self.bonus_turn, _ = roll_kori()
         
-        # If Player 0 has no valid moves on reset, skip turn and run opponents
         valid_moves = self.engine.get_valid_moves(0, self.current_roll)
         while not valid_moves:
             # Player 0 passes turn, run opponents

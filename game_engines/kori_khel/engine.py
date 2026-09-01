@@ -53,25 +53,25 @@ GLOBAL_SAFE_ZONES.sort()
 # --- KORI (DICE) LOGIC ---
 def roll_kori():
     """
-    Simulates throwing 6 cowrie shells.
+    Simulates throwing 6 cowrie shells based on final Kori Khel specification.
     Returns: steps (int), bonus_turn (bool), uburi_count (int)
     """
-    uburi_count = np.random.binomial(6, 0.5)
+    uburi_count = np.random.binomial(6, 0.5) # number of closed shells (0 to 6)
     
-    if uburi_count == 1:
-        return 10, True, uburi_count   # Jagowa
-    elif uburi_count == 2:
+    if uburi_count == 1:    # 5 open, 1 closed -> Jagowa (10 pts + Extra Turn)
+        return 10, True, uburi_count
+    elif uburi_count == 5:  # 1 open, 5 closed -> Pochi (25 pts + Extra Turn)
+        return 25, True, uburi_count
+    elif uburi_count == 0:  # 6 open, 0 closed -> Mudra (12 pts + Extra Turn)
+        return 12, True, uburi_count
+    elif uburi_count == 4:  # 2 open, 4 closed -> 2 pts
         return 2, False, uburi_count
-    elif uburi_count == 3:
+    elif uburi_count == 3:  # 3 open, 3 closed -> 3 pts
         return 3, False, uburi_count
-    elif uburi_count == 4:
+    elif uburi_count == 2:  # 4 open, 2 closed -> 4 pts
         return 4, False, uburi_count
-    elif uburi_count == 5:
-        return 25, True, uburi_count   # Pachi
-    elif uburi_count == 6:
-        return 6, True, uburi_count    # Full Marks
-    elif uburi_count == 0:
-        return 6, True, uburi_count    # Mudra
+    elif uburi_count == 6:  # 0 open, 6 closed -> 6 pts (Standard, no bonus)
+        return 6, False, uburi_count
     else:
         raise ValueError(f"Invalid cowrie throw: {uburi_count}")
 

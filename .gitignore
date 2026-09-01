@@ -37,3 +37,22 @@ Thumbs.db
 experiments/**/checkpoints/
 experiments/**/runs/
 training/**/logs/
+
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.bcf
+*.fls
+*.fdb_latexmk
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.run.xml
+*.synctex.gz
