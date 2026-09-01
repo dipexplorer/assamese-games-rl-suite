@@ -1,8 +1,6 @@
 # Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games
 
-This repository contains the official implementation of the computational formalization and OpenAI Gymnasium environments for Assamese traditional games. The codebase establishes baseline reinforcement learning (RL) policies for these environments, currently focusing on Kori Khel. 
-
-This work is intended for the **IndoML 2026 Undergraduate Forum**.
+This repository contains the official implementation of the computational formalization and OpenAI Gymnasium environments for Assamese traditional games. The codebase establishes baseline reinforcement learning (RL) policies for these environments, currently focusing on Kori Khel.
 
 ## Overview
 
@@ -53,20 +51,6 @@ The formalization framework is actively being extended to other regional games, 
 - **Tekeli Bhonga**: POMDP spatial navigation constraints under partial observability.
 - **Koni Juj**: Discrete collision MDPs for structural integrity prediction.
 - **Ha-Doo-Doo**: Continuous territory-control modeling.
-
-## Citation
-
-If you utilize this codebase or environment in your research, please cite the associated paper:
-
-```bibtex
-@inproceedings{das2026korikhel,
-  title={Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel},
-  author={Das, Dipjyoti and Sharma, Simanata and Bhattacharyya, Rupam},
-  booktitle={7th Indian Symposium on Machine Learning (IndoML) - Undergraduate Forum},
-  year={2026},
-  address={Kolkata, India}
-}
-```
 
 ## Authors
 - **Dipjyoti Das**
