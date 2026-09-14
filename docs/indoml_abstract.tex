@@ -111,7 +111,8 @@ We trained Standard PPO for \textbf{1.0M timesteps} and Maskable PPO for \textbf
 \centering
 \caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1.0M, Maskable PPO: 2.0M).}
 \label{tab:results}
-\resizebox{\linewidth}{!}{%
+\small
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lcc}
 \toprule
 \textbf{Metric} & \textbf{Standard PPO (1.0M)} & \textbf{Maskable PPO (2.0M)} \\
@@ -121,8 +122,7 @@ Rule Adherence (\%) & 72.80\% & \textbf{100.00\%} \\
 Avg Episode Length & 94.2 turns & \textbf{59.5 turns} \\
 Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
 
 \begin{figure}[htbp]
