@@ -8,9 +8,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from environments.kori_khel_env import KoriKhelEnv
 from stable_baselines3 import PPO
 
-def evaluate_agent(model_path, num_episodes=100):
+def evaluate_agent(model_path, num_episodes=1000):
     """
-    Evaluates the trained PPO agent against random opponents over 100 games
+    Evaluates the trained PPO agent against 3 heuristic opponents over 1,000 games
     and prints the average win rate, steps, and reward metrics.
     """
     print(f"Loading trained PPO model from: {model_path}")
@@ -55,9 +55,7 @@ def evaluate_agent(model_path, num_episodes=100):
                 
                 total_actions_count += 1
                 
-                # --- EVALUATION FALLBACK ---
-                # If PPO predicts an invalid move (since standard SB3 PPO doesn't support action masking out-of-the-box),
-                # we apply a fallback to choose a valid action, but log it to see if PPO has learned the rules.
+                # Evaluation fallback for illegal moves predicted by standard PPO
                 if action not in valid_moves:
                     fallback_actions_count += 1
                     action = int(np.random.choice(valid_moves))
@@ -75,8 +73,8 @@ def evaluate_agent(model_path, num_episodes=100):
         else:
             opponent_wins += 1
             
-        if (ep + 1) % 10 == 0:
-            print(f"Games played: {ep+1:3d}/{num_episodes} | PPO Wins: {ppo_wins:2d} | Win Rate: {(ppo_wins/(ep+1))*100:5.1f}%")
+        if (ep + 1) % 100 == 0:
+            print(f"Games played: {ep+1:4d}/{num_episodes} | PPO Wins: {ppo_wins:3d} | Win Rate: {(ppo_wins/(ep+1))*100:5.1f}%")
 
     # Final calculations
     win_rate = (ppo_wins / num_episodes) * 100
@@ -85,7 +83,7 @@ def evaluate_agent(model_path, num_episodes=100):
     rule_adherence = ((total_actions_count - fallback_actions_count) / total_actions_count) * 100
 
     print("=" * 60)
-    print("🏆 FINAL EVALUATION RESULTS 🏆")
+    print("🏆 FINAL STANDARD PPO EVALUATION RESULTS (1,000 Games) 🏆")
     print("=" * 60)
     print(f"PPO Agent Win Rate    : {win_rate:.2f}% ({ppo_wins}/{num_episodes} games)")
     print(f"Opponents Win Rate    : {(opponent_wins/num_episodes)*100:.2f}%")
@@ -97,17 +95,20 @@ def evaluate_agent(model_path, num_episodes=100):
     print("============================================================\n")
 
     # Save results to a markdown file for references
-    results_path = "evaluation/kori_khel/benchmark_results.md"
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    results_path = os.path.join(project_root, "evaluation", "kori_khel", "benchmark_results.md")
     os.makedirs(os.path.dirname(results_path), exist_ok=True)
     with open(results_path, "w") as f:
-        f.write(f"# Kori Khel PPO Agent Evaluation Benchmark\n\n")
-        f.write(f"- **Total Games Played:** {num_episodes}\n")
-        f.write(f"- **PPO Agent Win Rate:** {win_rate:.2f}%\n")
+        f.write(f"# Kori Khel Standard PPO Agent Evaluation Benchmark\n\n")
+        f.write(f"- **Total Games Evaluated:** {num_episodes}\n")
+        f.write(f"- **Standard PPO Agent Win Rate:** {win_rate:.2f}%\n")
+        f.write(f"- **Opponents Win Rate:** {(opponent_wins/num_episodes)*100:.2f}%\n")
         f.write(f"- **Average steps per game:** {avg_steps:.1f}\n")
         f.write(f"- **Average episode reward:** {avg_reward:.2f}\n")
         f.write(f"- **AI Rule Adherence:** {rule_adherence:.1f}%\n")
     print(f"Results saved to: {results_path}")
 
 if __name__ == "__main__":
-    model_path = "agents/kori_khel/ppo_kori_khel.zip"
-    evaluate_agent(model_path, num_episodes=100)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    model_path = os.path.join(project_root, "agents", "kori_khel", "ppo_kori_khel.zip")
+    evaluate_agent(model_path, num_episodes=1000)

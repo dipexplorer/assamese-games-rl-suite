@@ -23,9 +23,9 @@ def get_env_mask(env):
             break
     return current_env.action_masks()
 
-def evaluate_maskable_agent(model_path, num_episodes=100):
+def evaluate_maskable_agent(model_path, num_episodes=1000):
     """
-    Evaluates the trained MaskablePPO agent against random opponents over 100 games
+    Evaluates the trained MaskablePPO agent against 3 heuristic opponents over 1,000 games
     and prints the average win rate, steps, and reward metrics.
     """
     print(f"Loading trained Maskable PPO model from: {model_path}")
@@ -67,7 +67,7 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
                 # Extract action mask for the current state
                 action_mask = get_env_mask(env)
                 
-                # Predict action utilizing the action mask (stochastic evaluation for stochastic board games)
+                # Predict action utilizing the action mask
                 action, _states = model.predict(obs, action_masks=action_mask, deterministic=False)
                 action = int(action)
                 
@@ -75,7 +75,6 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
                 
                 # Double check if PPO's masked output is legally valid
                 if action not in valid_moves:
-                    # This should NEVER happen with Action Masking
                     fallback_actions_count += 1
                     action = int(np.random.choice(valid_moves))
                 
@@ -92,8 +91,8 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
         else:
             opponent_wins += 1
             
-        if (ep + 1) % 10 == 0:
-            print(f"Games played: {ep+1:3d}/{num_episodes} | PPO Wins: {ppo_wins:2d} | Win Rate: {(ppo_wins/(ep+1))*100:5.1f}%")
+        if (ep + 1) % 100 == 0:
+            print(f"Games played: {ep+1:4d}/{num_episodes} | PPO Wins: {ppo_wins:3d} | Win Rate: {(ppo_wins/(ep+1))*100:5.1f}%")
 
     # Final calculations
     win_rate = (ppo_wins / num_episodes) * 100
@@ -102,7 +101,7 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
     rule_adherence = ((total_actions_count - fallback_actions_count) / total_actions_count) * 100
 
     print("=" * 60)
-    print("🏆 FINAL MASKABLE PPO EVALUATION RESULTS 🏆")
+    print("🏆 FINAL MASKABLE PPO EVALUATION RESULTS (1,000 Games) 🏆")
     print("=" * 60)
     print(f"PPO Agent Win Rate    : {win_rate:.2f}% ({ppo_wins}/{num_episodes} games)")
     print(f"Opponents Win Rate    : {(opponent_wins/num_episodes)*100:.2f}%")
@@ -118,9 +117,10 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
     results_path = os.path.join(project_root, "evaluation", "kori_khel", "benchmark_results_maskable.md")
     os.makedirs(os.path.dirname(results_path), exist_ok=True)
     with open(results_path, "w") as f:
-        f.write(f"# Kori Khel Maskable PPO Agent Evaluation Benchmark\n\n")
-        f.write(f"- **Total Games Played:** {num_episodes}\n")
+        f.write(f"# Kori Khel Maskable PPO Agent Evaluation Benchmark (Tuned)\n\n")
+        f.write(f"- **Total Games Evaluated:** {num_episodes}\n")
         f.write(f"- **Maskable PPO Agent Win Rate:** {win_rate:.2f}%\n")
+        f.write(f"- **Opponents Win Rate:** {(opponent_wins/num_episodes)*100:.2f}%\n")
         f.write(f"- **Average steps per game:** {avg_steps:.1f}\n")
         f.write(f"- **Average episode reward:** {avg_reward:.2f}\n")
         f.write(f"- **AI Rule Adherence:** {rule_adherence:.1f}% (Expected: 100.0%)\n")
@@ -129,4 +129,4 @@ def evaluate_maskable_agent(model_path, num_episodes=100):
 if __name__ == "__main__":
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     model_path = os.path.join(project_root, "agents", "kori_khel", "maskable_ppo_kori_khel.zip")
-    evaluate_maskable_agent(model_path, num_episodes=100)
+    evaluate_maskable_agent(model_path, num_episodes=1000)

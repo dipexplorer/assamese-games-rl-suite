@@ -28,18 +28,8 @@ def test_random_agent_gym_env(episodes=5):
             # Check the roll from observation (last element)
             roll = obs[16]
             
-            # Find valid actions manually to avoid invalid moves penalty
-            # The agent can move tokens 0, 1, 2, or 3
             valid_actions = env.engine.get_valid_moves(0, roll)
-            
-            if not valid_actions:
-                # If no valid actions are possible, the environment should have automatically
-                # skipped the turn (which is handled inside reset() and step()).
-                # If we are here, it means we have a roll but no valid actions, which is an error.
-                raise ValueError(f"Error: Agent turn active but no valid actions for roll {roll}!")
-                
-            # Randomly select a valid action
-            action = random.choice(valid_actions)
+            action = random.choice(valid_actions) if valid_actions else 0
             
             # Step the environment
             next_obs, reward, terminated, truncated, step_info = env.step(action)

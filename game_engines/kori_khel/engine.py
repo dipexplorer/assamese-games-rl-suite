@@ -7,47 +7,42 @@ BOARD_LENGTH = 73  # Cells 1 to 72 are track, 73 is Paka (Goal). 0 is Base.
 
 # --- COORDINATE MAPPING LOGIC ---
 
+# Exactly 8 Safe Zone cells on the shared 64-cell perimeter track:
+# Row 4 X-marks on all 8 outer columns (2 per arm x 4 arms = 8 total)
+GLOBAL_SAFE_ZONES = [5, 12, 21, 28, 37, 44, 53, 60]
+
 def coords_to_global_pos(arm_id, side, row):
     """
     Translates physical 2D board coordinates to global 1D index cells (1-64).
-    Supports 'right', 'left', and 'middle' columns to map X marks accurately.
+    Supports anti-clockwise track traversal around the perimeter.
     
-    Args:
-        arm_id (int): 0, 1, 2, or 3 (clockwise).
-        side (str): 'right', 'left', or 'middle'.
-        row (int): 1 (innermost row) to 8 (outermost row).
-    Returns:
-        list of int: The mapped 1D cell indices.
+    arm_id: 0 (Bottom), 1 (Right), 2 (Top), 3 (Left)
+    side: 'right', 'left', 'top', 'bottom', or 'middle'
+    row: 1 (innermost near center) to 8 (outermost at tip)
     """
-    base_offset = arm_id * 16
-    if side == 'right':
-        # Right column goes from Row 1 to Row 8
-        return [base_offset + row]
-    elif side == 'left':
-        # Left column goes from Row 8 down to Row 1
-        return [base_offset + 8 + (8 - row + 1)]
-    elif side == 'middle':
-        if row == 8:
-            # Row 8 of the middle column is the physical tip of the arm.
-            # In our 64-cell loop, the goti turns at the tip from right col to left col.
-            # Thus, both cell 8 (end of right) and cell 9 (start of left) represent this tip.
-            return [base_offset + 8, base_offset + 9]
-        else:
-            # Rows 1-7 of the middle column are private home columns, not on the shared track.
-            return []
-    else:
-        raise ValueError("Side must be 'right', 'left', or 'middle'")
+    # Direct mapping helper based on continuous anti-clockwise loop:
+    if arm_id == 0:  # Bottom Arm
+        if side in ['right', 'outer_right']:
+            return [8 - row + 1]  # Row 8 -> Cell 1, Row 1 -> Cell 8
+        elif side in ['left', 'outer_left']:
+            return [56 + row]     # Row 1 -> Cell 57, Row 8 -> Cell 64
+    elif arm_id == 1:  # Right Arm
+        if side in ['bottom', 'outer_bottom']:
+            return [8 + row]      # Row 1 -> Cell 9, Row 8 -> Cell 16
+        elif side in ['top', 'outer_top']:
+            return [16 + (8 - row + 1)]  # Row 8 -> Cell 17, Row 1 -> Cell 24
+    elif arm_id == 2:  # Top Arm
+        if side in ['right', 'outer_right']:
+            return [24 + row]     # Row 1 -> Cell 25, Row 8 -> Cell 32
+        elif side in ['left', 'outer_left']:
+            return [32 + (8 - row + 1)]  # Row 8 -> Cell 33, Row 1 -> Cell 40
+    elif arm_id == 3:  # Left Arm
+        if side in ['top', 'outer_top']:
+            return [40 + row]     # Row 1 -> Cell 41, Row 8 -> Cell 48
+        elif side in ['bottom', 'outer_bottom']:
+            return [48 + (8 - row + 1)]  # Row 8 -> Cell 49, Row 1 -> Cell 56
 
-# Programmatically generate safe zones using verified physical coordinates
-GLOBAL_SAFE_ZONES = []
-for arm in range(NUM_PLAYERS):
-    # Rule: X marks are at Row 3 on both side columns, and Row 8 at the middle column tip
-    GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'right', 4))   # Row 4 Right Column
-    GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'middle', 8))  # Row 8 Middle Column (Tip)
-    GLOBAL_SAFE_ZONES.extend(coords_to_global_pos(arm, 'left', 4))    # Row 4 Left Column
-
-# Sort for consistency
-GLOBAL_SAFE_ZONES.sort()
+    return []
 
 
 # --- KORI (DICE) LOGIC ---
@@ -83,10 +78,6 @@ class Token:
     def __init__(self, token_id):
         self.id = token_id
         self.position = 0  # 0: Base, 1-64: Perimeter, 65-72: Home Column, 73: Paka
-
-    @property
-    def is_active(self):
-        return 0 < self.position < BOARD_LENGTH
 
     @property
     def is_paka(self):
@@ -157,9 +148,9 @@ class KoriKhelEngine:
         player = self.players[player_id]
         token = player.tokens[token_id]
 
-        # Double check if move is valid
-        valid_moves = self.get_valid_moves(player_id, steps)
-        if token_id not in valid_moves:
+        # Validate move inline — avoids calling get_valid_moves() a second time
+        # (env.step already validated before calling make_move)
+        if token.position >= BOARD_LENGTH or (token.position == 0 and steps != 10):
             return {"status": "invalid_move"}
 
         captured_token_info = None
@@ -210,19 +201,11 @@ class KoriKhelEngine:
         self.current_player = (self.current_player + 1) % NUM_PLAYERS
 
 
-# --- TEST PLAY ---
+# --- SELF CHECK ---
 if __name__ == "__main__":
-    print("Testing Part C: Kori Khel Game Engine (Corrected Coordinate Mapping)")
-    print("-" * 70)
-    print("Programmatically Generated Global Safe Zones:")
-    for idx, cell in enumerate(GLOBAL_SAFE_ZONES):
-        found = False
-        for arm in range(4):
-            for side in ['right', 'left', 'middle']:
-                for row in range(1, 9):
-                    if cell in coords_to_global_pos(arm, side, row):
-                        print(f"Safe Zone {idx+1:2d}: 1D Index {cell:2d} -> Arm {arm}, {side:6s} column, Row {row}")
-                        found = True
-                        break
-                if found: break
-            if found: break
+    print("Kori Khel Engine — Self Check")
+    print(f"Safe Zones ({len(GLOBAL_SAFE_ZONES)} total): {GLOBAL_SAFE_ZONES}")
+    steps, bonus, uburi = roll_kori()
+    print(f"Sample roll → steps={steps}, bonus={bonus}, uburi={uburi}")
+    engine = KoriKhelEngine()
+    print(f"Engine initialized: {engine.players}")
