@@ -12,6 +12,11 @@
 \usepackage{xcolor}
 \usepackage{titlesec}
 
+% --- COLUMN & TABLE STYLING ---
+\setlength{\columnsep}{20pt}
+\setlength{\heavyrulewidth}{0.4pt}
+\setlength{\lightrulewidth}{0.25pt}
+
 % --- SECTION SPACING ---
 \titlespacing*{\section}{0pt}{7pt}{3pt}
 \titlespacing*{\subsection}{0pt}{5pt}{2pt}
@@ -109,11 +114,11 @@ We trained Standard PPO for \textbf{1.0M timesteps} and Maskable PPO for \textbf
 
 \begin{table}[t]
 \centering
-\caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1.0M timesteps, Maskable PPO: 2.0M timesteps).}
+\caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1M timesteps, Maskable PPO: 2M timesteps).}
 \label{tab:results}
 \small
-\setlength{\tabcolsep}{8pt}
-\begin{tabular}{lcc}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{} l c c @{}}
 \toprule
 \textbf{Metric} & \textbf{Standard PPO} & \textbf{Maskable PPO} \\
 \midrule
