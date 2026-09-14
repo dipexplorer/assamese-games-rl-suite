@@ -9,19 +9,19 @@
 
 ## Abstract
 
-Reinforcement Learning (RL) benchmark environments are predominantly focused on standardized Western board and video games. Consequently, indigenous multi-agent board games with asymmetric stochastic dynamics and complex topological constraints remain unmodeled in standard RL benchmark suites. In this paper, we present a computational formalization and Gymnasium environment for **Kori Khel**, a 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate baseline policy gradient performance using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (1.0M training timesteps) and invalid action masking (2.0M training timesteps). Across a statistically rigorous 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (72.8% rule adherence, 28.30% win rate) due to entry-state bottlenecks, whereas Maskable PPO achieves 100.0% rule adherence, an average episode reward of +108.90, and a **36.20% win rate** against rule-compliant opponents in a 4-player setting (25.0% random baseline). We analyze why action masking is mathematically essential in stochastic games with hard entry constraints and outline a path toward a broader suite of formalized regional games.
+Reinforcement Learning (RL) benchmark environments have focused primarily on standardized Western board and video games. Consequently, indigenous multi-agent board games featuring asymmetric stochastic dynamics and complex topological constraints remain largely unmodeled in standard RL benchmark suites. In this paper, we present a computational formalization and Gymnasium environment for **Kori Khel**, a traditional 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the physical 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate policy gradient baselines using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (1.0M timesteps) and invalid action masking (2.0M timesteps). Across a 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (72.8% rule adherence, 28.30% win rate) due to severe entry-state bottlenecks. In contrast, Maskable PPO achieves 100.0% rule adherence, an average episode reward of +108.90, and a **36.20% win rate** against rule-compliant opponents in a 4-player setting (outperforming the 25.0% random baseline). We analyze the mathematical necessity of action masking in stochastic games with hard entry constraints and outline directions toward formalizing broader suites of regional games.
 
 ---
 
 ## 1. Introduction
 
-**Kori Khel** is a 4-player cowrie-shell race game played across rural Assam, structurally resembling Pachisi/Ludo but characterized by a highly skewed binomial dice distribution and a strict entry constraint: tokens remain trapped off-board ($s=0$) until an exact roll (_Jagowa_) is obtained. This entry rule induces a severely bottlenecked action space where reward-penalty shaping fails to guide unmasked policy gradient methods, making Kori Khel an ideal testbed for invalid action masking techniques.
+**Kori Khel** is a 4-player cowrie-shell race game played across rural Assam, India. Structurally resembling Pachisi and Ludo, it is characterized by a highly skewed binomial dice distribution and a strict entry constraint: tokens remain trapped off-board ($s=0$) until an exact roll (_Jagowa_) is obtained. This entry rule induces a bottlenecked action space where reward-penalty shaping fails to guide unmasked policy gradient methods, rendering Kori Khel a compelling domain for evaluating invalid action masking techniques.
 
-While RL has been benchmarked extensively on Chess, Go, and StarCraft II, regional games such as Kori Khel lack computational state-space definitions. In this work, we formalize Kori Khel from scratch, establishing:
+While RL benchmark suites encompass Chess, Go, and StarCraft II, regional Indian games lack standardized computational state-space definitions. This work addresses this gap through the following contributions:
 
-1. A formal state-space specification of Kori Khel, mapping its physical 2D cross grid to a 73-state 1D coordinate system.
+1. A formal state-space specification of Kori Khel, mapping its physical 2D cross grid into a 73-state 1D coordinate system.
 2. An open-source OpenAI Gymnasium environment (`KoriKhelEnv`).
-3. Comparative baseline benchmarks evaluating Standard PPO versus Maskable PPO under stochastic dice conditions.
+3. A comparative empirical benchmark evaluating Standard PPO versus Maskable PPO under stochastic dice conditions.
 
 ---
 
