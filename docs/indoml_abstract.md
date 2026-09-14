@@ -55,7 +55,7 @@ The physical board consists of 4 arms arranged in a cross (➕), each with 3 col
 
 ### 3.1 Observation & Action Spaces
 
-- **Observation Vector $\mathbf{o} \in \mathbb{Z}^{17}$:** Formatted as $[s_{0..3}, s^{\text{rel}}_{1..12}, r]$. We represent the 4 active agent token positions absolute ($s \in [0,73]$), while the 12 opponent token positions (3 opponents $\times$ 4 tokens) are mapped _relative_ to the agent's start index to maintain rotational invariance across player seats. $r \in [0,25]$ denotes the current roll.
+- **Observation Vector $\mathbf{o} \in \mathbb{Z}^{30}$:** Concatenates raw positions and engineered tactical features: $[s_{0..3}, s^{\text{opp}}_{1..12}, r, b, \mathbf{c}_{0..3}, \mathbf{z}_{0..3}, \mathbf{d}_{0..3}]$, where $s_{0..3}$ denote active agent positions ($[0,73]$), $s^{\text{opp}}_{1..12}$ denote opponent positions across seats, $r \in [0,25]$ is the dice roll, $b \in \{0,1\}$ is the bonus turn flag, $\mathbf{c} \in \{0,1\}^4$ indicate projected captures, $\mathbf{z} \in \{0,1\}^4$ indicate safe-zone landings, and $\mathbf{d} \in [0,64]^4$ measure rear threat distances.
 - **Action Space $a \in \{0, 1, 2, 3\}$:** Discrete action selecting which of the 4 agent tokens to advance.
 
 ### 3.2 Reward Design & Coefficient Justification
