@@ -117,18 +117,10 @@ Open `http://127.0.0.1:5000` in your browser.
 
 ---
 
-## 📜 Citation & Authors
+## 👥 Authors & Affiliation
 
-If you find this codebase or environment useful in your research, please cite:
+- **Dipjyoti Das**
+- **Simanta Sharma**
+- **Rupam Bhattacharyya (Advisor)**
 
-```bibtex
-@inproceedings{das2026korikhel,
-  title={Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel},
-  author={Dipjyoti Das and Simanta Sharma and Rupam Bhattacharyya},
-  booktitle={Proceedings of the Indian Symposium on Machine Learning (IndoML)},
-  year={2026}
-}
-```
-
-**Authors**: Dipjyoti Das, Simanta Sharma, Rupam Bhattacharyya (Advisor)  
-**Affiliation**: Department of Information Technology, Gauhati University, Assam, India
+*Department of Information Technology, Gauhati University, Assam, India*
