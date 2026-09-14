@@ -2,7 +2,7 @@
 
 Official repository for the Gymnasium environment and reinforcement learning baselines for **Kori Khel**, a traditional 4-player stochastic cowrie-shell board game native to Assam, India.
 
-> **Paper**: *Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel* (IndoML 2026)
+> **Paper**: *Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel*
 
 ---
 
@@ -62,7 +62,7 @@ Models were evaluated across a 1,000-game head-to-head benchmark against 3 rule-
 │   ├── gui_server.py           # Flask server
 │   └── templates/index.html    # Board rendering interface
 └── docs/                       # Research paper source files
-    ├── indoml_abstract.tex     # Camera-ready IndoML LaTeX source
+    ├── indoml_abstract.tex     # Camera-ready LaTeX paper source
     └── indoml_abstract.md      # Extended abstract markdown
 ```
 

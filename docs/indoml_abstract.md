@@ -1,7 +1,5 @@
 # Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel
 
-**Target Venue:** IndoML 2026 (7th Indian Symposium on Machine Learning) — Undergraduate Forum  
-**Venue & Date:** IIT Kharagpur Kolkata Extension Centre / Research Park | December 18–20, 2026  
 **Authors:** Dipjyoti Das, Simanta Sharma, Rupam Bhattacharyya (Advisor)  
 **Affiliation:** Department of Information Technology, Gauhati University, Assam, India
 
