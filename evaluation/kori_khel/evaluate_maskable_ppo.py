@@ -101,7 +101,7 @@ def evaluate_maskable_agent(model_path, num_episodes=1000):
     rule_adherence = ((total_actions_count - fallback_actions_count) / total_actions_count) * 100
 
     print("=" * 60)
-    print("🏆 FINAL MASKABLE PPO EVALUATION RESULTS (1,000 Games) 🏆")
+    print("MASKABLE PPO EVALUATION RESULTS (1,000 Games)")
     print("=" * 60)
     print(f"PPO Agent Win Rate    : {win_rate:.2f}% ({ppo_wins}/{num_episodes} games)")
     print(f"Opponents Win Rate    : {(opponent_wins/num_episodes)*100:.2f}%")

@@ -18,11 +18,11 @@ def mask_fn(env):
 def watch_game():
     """Loads either Maskable PPO or Standard PPO and runs a step-by-step game demo."""
     print("\n============================================================")
-    print("🏆 KORI KHEL MODEL WATCHER 🏆")
+    print("KORI KHEL MODEL WATCHER")
     print("============================================================")
-    print("Select AI Algorithm to watch:")
+    print("Select Algorithm to watch:")
     print("1. Maskable PPO (Masked Model - 100% Rule Compliance)")
-    print("2. Standard PPO (Unmasked Model - Baseline)")
+    print("2. Standard PPO (Unmasked Baseline)")
     print("============================================================")
     
     choice = input("Enter choice (1 or 2): ").strip()
@@ -68,7 +68,7 @@ def watch_game():
     
     while not terminated and not truncated:
         step_count += 1
-        input(f"👉 [Step {step_count}] Press Enter to see AI's move...")
+        input(f"[Step {step_count}] Press Enter to step AI move...")
         
         roll = raw_env.current_roll
         valid_moves = raw_env.engine.get_valid_moves(0, roll)
@@ -92,15 +92,15 @@ def watch_game():
         
         # Print description of the step
         print("\n------------------------------------------------------------")
-        print(f"🤖 AI rolled {roll} | Valid tokens: {valid_moves}")
+        print(f"Agent rolled {roll} | Valid tokens: {valid_moves}")
         
         if not is_masked and "invalid" in info:
-            print(f"❌ Action: Selected Token {action} (ILLEGAL MOVE!) | Penalty: -2.0")
+            print(f"Action: Selected Token {action} (ILLEGAL MOVE) | Penalty: -2.0")
         else:
-            print(f"🎯 Action: Selected Token {action} | Moved: Cell {old_position} -> Cell {new_position}")
+            print(f"Action: Selected Token {action} | Moved: Cell {old_position} -> Cell {new_position}")
             
         if new_position == 73 and old_position < 73:
-            print("🎉 Success: Token reached the Goal (Paka)!")
+            print("Token reached the Goal (Paka).")
         
         # Render current state
         print("------------------------------------------------------------")
@@ -110,13 +110,13 @@ def watch_game():
         time.sleep(0.3)
         
     print("============================================================")
-    print("🏁 GAME OVER 🏁")
+    print("GAME OVER")
     print("============================================================")
     winner = raw_env.engine.winner
     if winner == 0:
-        print("🏆 Congratulations! AI (Player 0) WON the game!")
+        print("Agent (Player 0) WON the game.")
     else:
-        print(f"💀 AI Lost. Opponent Player {winner} won the game.")
+        print(f"Agent Lost. Opponent Player {winner} won the game.")
     print("============================================================\n")
 
 if __name__ == "__main__":
