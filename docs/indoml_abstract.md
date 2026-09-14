@@ -1,5 +1,7 @@
 # Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel
 
+**Target Venue:** IndoML 2026 (7th Indian Symposium on Machine Learning) — Undergraduate Forum  
+**Venue & Date:** IIT Kharagpur Kolkata Extension Centre / Research Park | December 18–20, 2026  
 **Authors:** Dipjyoti Das, Simanta Sharma, Rupam Bhattacharyya (Advisor)  
 **Affiliation:** Department of Information Technology, Gauhati University, Assam, India
 
@@ -77,18 +79,18 @@ We trained Standard PPO for **1M timesteps** and Maskable PPO for **2M timesteps
 
 ### 4.1 Quantitative Performance (1,000-Game Head-to-Head Benchmark)
 
-| Metric | Standard PPO (1M Steps) | Maskable PPO (2M Steps, Tuned) | Relative Advantage |
-| :--- | :---: | :---: | :---: |
-| **Win Rate (%)** | 28.30% | **36.20%** | **+27.9% Relative Gain** |
-| **Rule Adherence Rate (%)** | 72.80% | **100.00%** | **Perfect Policy Validity** |
-| **Average Episode Length (Turns)** | 94.2 turns | **59.5 turns** | **~37% Faster Completion** |
-| **Average Episode Reward** | +80.93 pts | **+108.90 pts** | **+34.6% Reward Efficiency** |
+| Metric                             | Standard PPO (1M Steps) | Maskable PPO (2M Steps, Tuned) |      Relative Advantage      |
+| :--------------------------------- | :---------------------: | :----------------------------: | :--------------------------: |
+| **Win Rate (%)**                   |         28.30%          |           **36.20%**           |   **+27.9% Relative Gain**   |
+| **Rule Adherence Rate (%)**        |         72.80%          |          **100.00%**           | **Perfect Policy Validity**  |
+| **Average Episode Length (Turns)** |       94.2 turns        |         **59.5 turns**         |  **~37% Faster Completion**  |
+| **Average Episode Reward**         |       +80.93 pts        |        **+108.90 pts**         | **+34.6% Reward Efficiency** |
 
 ![Figure 1: Head-to-Head Benchmark Comparison](../evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png)  
-*Figure 1: Head-to-Head 1,000-Game Benchmark Comparison across Win Rate (%), Rule Adherence (%), and Average Episode Reward (pts).*
+_Figure 1: Head-to-Head 1,000-Game Benchmark Comparison across Win Rate (%), Rule Adherence (%), and Average Episode Reward (pts)._
 
 ![Figure 2: Training Trajectory Comparison](../evaluation/kori_khel/plots/training_curves_comparison.png)  
-*Figure 2: Training Trajectory Comparison over training timesteps showing moving average reward and episode length convergence.*
+_Figure 2: Training Trajectory Comparison over training timesteps showing moving average reward and episode length convergence._
 
 ### 4.2 Analytical Insights
 
