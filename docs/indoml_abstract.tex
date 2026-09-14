@@ -109,13 +109,13 @@ We trained Standard PPO for \textbf{1.0M timesteps} and Maskable PPO for \textbf
 
 \begin{table}[htbp]
 \centering
-\caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1.0M, Maskable PPO: 2.0M).}
+\caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1.0M timesteps, Maskable PPO: 2.0M timesteps).}
 \label{tab:results}
 \small
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{8pt}
 \begin{tabular}{lcc}
 \toprule
-\textbf{Metric} & \textbf{Standard PPO (1.0M)} & \textbf{Maskable PPO (2.0M)} \\
+\textbf{Metric} & \textbf{Standard PPO} & \textbf{Maskable PPO} \\
 \midrule
 Win Rate (\%) & 28.30\% & \textbf{36.20\%} \\
 Rule Adherence (\%) & 72.80\% & \textbf{100.00\%} \\
@@ -132,15 +132,15 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \label{fig:benchmark_comparison}
 \end{figure}
 
+\subsection{Analytical Insights}
+Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1.0M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{36.20\% win rate} after 2.0M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
+
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.96\linewidth]{../evaluation/kori_khel/plots/training_curves_comparison.png}
 \caption{Training Trajectory Comparison over Training Timesteps showing moving average reward and episode length convergence.}
 \label{fig:learning_curves}
 \end{figure}
-
-\subsection{Analytical Insights}
-Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1.0M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{36.20\% win rate} after 2.0M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
 
 % --- SECTION 5: CONCLUSION & FUTURE WORK ---
 \section{Conclusion \& Future Work}
