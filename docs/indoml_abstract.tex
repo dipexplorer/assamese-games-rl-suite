@@ -107,7 +107,7 @@ We trained Standard PPO for \textbf{1.0M timesteps} and Maskable PPO for \textbf
     \item \textbf{Maskable PPO (Masked, 2.0M):} Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
 \end{enumerate}
 
-\begin{table}[htbp]
+\begin{table}[t]
 \centering
 \caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1.0M timesteps, Maskable PPO: 2.0M timesteps).}
 \label{tab:results}
@@ -125,7 +125,7 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.96\linewidth]{../evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png}
 \caption{Head-to-Head 1,000-Game Benchmark Comparison across Win Rate (\%), Rule Adherence (\%), and Average Episode Reward (pts).}
@@ -135,7 +135,7 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \subsection{Analytical Insights}
 Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1.0M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{36.20\% win rate} after 2.0M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
 
-\begin{figure}[htbp]
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.96\linewidth]{../evaluation/kori_khel/plots/training_curves_comparison.png}
 \caption{Training Trajectory Comparison over Training Timesteps showing moving average reward and episode length convergence.}
