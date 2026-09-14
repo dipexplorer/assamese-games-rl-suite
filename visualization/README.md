@@ -1,29 +1,20 @@
-# visualization/
+# Visualization & Web GUI Interface
 
-## What is this?
-Code for rendering the game board and displaying the AI playing in real time.
+Flask-based interactive web server and rendering template for visualising Kori Khel game state transitions and agent decisions in real time.
 
-## Why does it exist?
-A working AI that you can **actually see playing** is 10x more impressive than
-just a number on a graph. This folder contains the board renderer — 
-either a terminal ASCII view or a simple Pygame/Matplotlib GUI.
+## Directory Structure
 
-## Files (will be added)
 ```
 visualization/
-└── kori_khel/
-    ├── renderer.py         ← Draw the cross board with token positions
-    └── demo.py             ← Watch the trained agent play a full game
+├── gui_server.py     # Flask backend server & WebSocket interface
+├── static/           # Asset images (board, cowrie shells)
+└── templates/        # HTML templates for 2D board UI
 ```
 
-## Usage (after training)
+## Running the Web GUI
+
 ```bash
-python visualization/kori_khel/demo.py
-# Watch the AI play Kori Khel step by step
+python -m visualization.gui_server
 ```
 
-## Resume value
-**A demo is worth a thousand graphs.**
-If you can show a recruiter a live demo of your AI playing an ancient Indian board game,
-that is an unforgettable impression. It also makes excellent demo material for the
-IndoML poster presentation.
+Open `http://127.0.0.1:5000` in a web browser.

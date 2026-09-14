@@ -1,27 +1,31 @@
-# evaluation/
+# Evaluation & Benchmarking
 
-## What is this?
-Scripts and results for measuring how well the trained AI performs.
+Scripts and tools for benchmarking trained RL policies against heuristic opponents.
 
-## Why does it exist?
-Training an agent is only half the job. You must also **prove it works**.
-This folder contains:
-- Scripts to run the trained agent against a random opponent
-- Win rate measurements
-- Performance comparison between PPO agent vs random agent vs rule-based agent
+## Directory Structure
 
-## Files (will be added)
 ```
 evaluation/
 └── kori_khel/
-    ├── evaluate.py              ← Run trained agent, measure win rate
-    ├── benchmark_results.md     ← PPO vs Random vs Rule-Based comparison
+    ├── evaluate.py                  # 1,000-game evaluation for Standard PPO
+    ├── evaluate_maskable_ppo.py     # 1,000-game evaluation for Maskable PPO
+    ├── generate_benchmark_plots.py  # Publication plot generator script
+    ├── benchmark_results.md         # Quantitative evaluation summary (PPO)
+    ├── benchmark_results_maskable.md# Quantitative evaluation summary (Maskable PPO)
     └── plots/
-        ├── win_rate.png         ← Win rate over evaluation episodes
-        └── reward_curve.png     ← Training reward over time
+        ├── ppo_vs_maskable_comparison.png
+        └── training_curves_comparison.png
 ```
 
-## Resume value
-**This is what goes in your abstract, report, and resume.**
-"Our PPO agent achieved a 78% win rate against a random baseline after 500k training steps."
-That's a result. Results are what recruiters and evaluators want to see.
+## Running Benchmarks
+
+```bash
+# Evaluate Maskable PPO model (1,000 games)
+python -m evaluation.kori_khel.evaluate_maskable_ppo
+
+# Evaluate Standard PPO model (1,000 games)
+python -m evaluation.kori_khel.evaluate
+
+# Generate publication plots
+python -m evaluation.kori_khel.generate_benchmark_plots
+```

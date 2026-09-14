@@ -3,10 +3,9 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Resolve project root once and reuse everywhere — avoids computing the same
-# dirname chain twice (was previously computed at module level AND inside the function)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(PROJECT_ROOT)
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
 
 from environments.kori_khel_env import KoriKhelEnv
 from stable_baselines3 import PPO
@@ -14,11 +13,8 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.results_plotter import load_results, ts2xy
 
 
-def train_agent(total_timesteps=100000):
-    """
-    Trains a standard PPO agent on the Kori Khel environment.
-    Saves the model weights and a training learning curve plot.
-    """
+def train_agent(total_timesteps=1_000_000):
+    """Trains a baseline PPO agent on the Kori Khel environment."""
     log_dir   = os.path.join(PROJECT_ROOT, "training", "kori_khel", "logs")
     model_dir = os.path.join(PROJECT_ROOT, "agents", "kori_khel")
     plot_dir  = os.path.join(PROJECT_ROOT, "evaluation", "kori_khel", "plots")
@@ -31,7 +27,6 @@ def train_agent(total_timesteps=100000):
     env = Monitor(KoriKhelEnv(), log_dir)
 
     print("Configuring PPO Model (MLP Policy)...")
-    # MLP Policy fits our flat Box observation space perfectly
     model = PPO(
         "MlpPolicy",
         env,
@@ -53,22 +48,18 @@ def train_agent(total_timesteps=100000):
     model.save(model_path)
     print(f"Model saved to: {model_path}")
 
-    print("Generating learning curve plot...")
     _plot_results(log_dir, plot_dir)
 
 
 def _plot_results(log_dir, plot_dir):
-    """Loads monitor logs and plots the smoothed training reward curve."""
+    """Loads monitor logs and plots smoothed training reward curve."""
     try:
         x, y = ts2xy(load_results(log_dir), "timesteps")
     except (FileNotFoundError, ValueError) as e:
-        # Specific exceptions only — broad Exception would hide programming errors
         print(f"Could not generate plot: {e}")
         return
 
     window = min(50, len(y))
-    # Only smooth if there are more points than the window;
-    # otherwise convolve returns a single point (not a useful curve)
     if len(y) > window:
         y_smoothed = np.convolve(y, np.ones(window) / window, mode="valid")
         x_smoothed = x[window - 1:]
@@ -77,8 +68,7 @@ def _plot_results(log_dir, plot_dir):
 
     plt.figure(figsize=(10, 5))
     plt.plot(x, y, alpha=0.2, color="blue", label="Raw Episode Reward")
-    plt.plot(x_smoothed, y_smoothed, color="red", linewidth=2,
-             label="Smoothed Reward (Moving Avg)")
+    plt.plot(x_smoothed, y_smoothed, color="red", linewidth=2, label="Smoothed Reward (Moving Avg)")
     plt.title("Kori Khel PPO — Training Learning Curve")
     plt.xlabel("Timesteps")
     plt.ylabel("Episode Reward")

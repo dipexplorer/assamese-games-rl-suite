@@ -1,24 +1,19 @@
-# environments/
+# Gymnasium Environments
 
-## What is this?
-Gymnasium-compatible wrappers that connect the game engine to the RL framework.
+This module implements Gymnasium-compatible environment wrappers for Assamese traditional games.
 
-## Why does it exist?
-Gymnasium is the industry-standard API for RL environments (used at OpenAI, DeepMind, etc.).
-This folder contains the `gym.Env` subclass for each game — the layer that turns a game into something an AI can train on.
+## Module Layout
 
-## What it defines
-- `observation_space` — What the AI can "see" (board state)
-- `action_space` — What moves the AI can make
-- `reset()` — Start a new game
-- `step(action)` — AI makes a move, environment returns new state + reward
-
-## Files (will be added)
 ```
 environments/
-└── kori_khel_env.py   ← Wraps game_engine → Gymnasium API
+└── kori_khel_env.py   # KoriKhelEnv-v0 implementation (OpenAI Gymnasium API)
 ```
 
-## Resume value
-Shows you understand the **standard ML engineering interface** used across the industry.
-Any ML engineer will immediately recognise a Gymnasium environment.
+## Environment Specifications (`KoriKhelEnv`)
+
+* **Observation Space**: `Box(low=0, high=73, shape=(17,), dtype=int32)`
+  * `obs[0..3]`: Absolute scalar positions of active agent's 4 tokens ($s \in [0, 73]$).
+  * `obs[4..15]`: Relative positions of 12 opponent tokens (3 opponents $\times$ 4 tokens).
+  * `obs[16]`: Current dice roll value ($r \in [0, 25]$).
+* **Action Space**: `Discrete(4)` — Select which token index ($0, 1, 2, 3$) to advance.
+* **Action Masking**: Exposes `action_masks()` returning a boolean array of length 4 indicating legal moves.

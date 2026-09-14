@@ -3,10 +3,9 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Resolve project root once and reuse everywhere — avoids computing the same
-# dirname chain twice (was previously computed at module level AND inside the function)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(PROJECT_ROOT)
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
 
 from environments.kori_khel_env import KoriKhelEnv
 from sb3_contrib import MaskablePPO
@@ -16,7 +15,7 @@ from stable_baselines3.common.results_plotter import load_results, ts2xy
 
 
 def mask_fn(env):
-    """Callback function that returns the action mask from the environment."""
+    """Returns the boolean action mask from the Gymnasium environment."""
     return env.action_masks()
 
 
@@ -28,10 +27,7 @@ def linear_schedule(initial_value: float, final_value: float = 5e-5):
 
 
 def train_maskable_agent(total_timesteps=2_000_000):
-    """
-    Trains a MaskablePPO agent on the Kori Khel environment using action masking.
-    Saves the model weights and a training learning curve plot.
-    """
+    """Trains a MaskablePPO agent on Kori Khel with invalid action masking."""
     log_dir   = os.path.join(PROJECT_ROOT, "training", "kori_khel", "logs_maskable")
     model_dir = os.path.join(PROJECT_ROOT, "agents", "kori_khel")
     plot_dir  = os.path.join(PROJECT_ROOT, "evaluation", "kori_khel", "plots")
@@ -45,7 +41,7 @@ def train_maskable_agent(total_timesteps=2_000_000):
     wrapped_env = ActionMasker(raw_env, mask_fn)
     env         = Monitor(wrapped_env, log_dir)
 
-    print("Configuring Tuned MaskablePPO Model (MLP Policy)...")
+    print("Configuring MaskablePPO Model (MLP Policy)...")
     model = MaskablePPO(
         "MlpPolicy",
         env,
@@ -67,37 +63,6 @@ def train_maskable_agent(total_timesteps=2_000_000):
     model_path = os.path.join(model_dir, "maskable_ppo_kori_khel.zip")
     model.save(model_path)
     print(f"Model saved to: {model_path}")
-
-    # Generate learning curve plot
-    print("Generating learning curve plot...")
-    try:
-        x, y = ts2xy(load_results(log_dir), "timesteps")
-        if len(x) > 0:
-            window = min(50, len(y))
-            if len(y) > window:
-                y_smoothed = np.convolve(y, np.ones(window) / window, mode="valid")
-                x_smoothed = x[window - 1:]
-            else:
-                y_smoothed, x_smoothed = y, x
-
-            plt.figure(figsize=(10, 5))
-            plt.plot(x, y, alpha=0.2, color="green", label="Raw Episode Reward")
-            plt.plot(x_smoothed, y_smoothed, color="darkgreen", linewidth=2,
-                     label="Smoothed Reward (Moving Avg)")
-            plt.title("Kori Khel MaskablePPO (Tuned) — Training Learning Curve")
-            plt.xlabel("Timesteps")
-            plt.ylabel("Episode Reward")
-            plt.grid(True)
-            plt.legend()
-
-            plot_path = os.path.join(plot_dir, "maskable_reward_curve.png")
-            plt.savefig(plot_path)
-            plt.close()
-            print(f"Learning curve saved to: {plot_path}")
-        else:
-            print("Warning: No training results found to plot.")
-    except (FileNotFoundError, ValueError) as e:
-        print(f"Could not generate plot: {e}")
 
 
 if __name__ == "__main__":

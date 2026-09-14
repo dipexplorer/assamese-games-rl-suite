@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assamese-games-rl-suite"
+version = "0.1.0"
+description = "Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "gymnasium>=1.0.0",
+    "stable-baselines3>=2.0.0",
+    "sb3-contrib>=2.0.0",
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "pandas>=1.4.0",
+    "flask>=2.0.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

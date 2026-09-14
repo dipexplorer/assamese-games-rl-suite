@@ -1,21 +1,25 @@
-# agents/
+# Saved Reinforcement Learning Models
 
-## What is this?
-Saved trained RL agent models — the actual AI that learned to play the games.
+This directory contains trained model weights for the Kori Khel environment in Stable-Baselines3 `.zip` format.
 
-## Why does it exist?
-After training, the model is saved here as a `.zip` file (Stable-Baselines3 format).
-Anyone can load this file and watch the trained agent play — without retraining.
+## Structure
 
-## Files (will be added after training)
 ```
 agents/
 └── kori_khel/
-    ├── ppo_kori_khel_v1.zip   ← Trained PPO model
-    └── ppo_kori_khel_v2.zip   ← Improved version
+    ├── maskable_ppo_kori_khel.zip  # Tuned Maskable PPO model (2.0M timesteps)
+    └── ppo_kori_khel.zip           # Baseline PPO model (1.0M timesteps)
 ```
 
-## Resume value
-This is **the proof that your project works**.
-A recruiter or evaluator can literally run `python evaluate.py` and watch 
-your AI play an ancient Assamese board game. That's impressive.
+## Loading Checkpoints
+
+```python
+from sb3_contrib import MaskablePPO
+from stable_baselines3 import PPO
+
+# Load Maskable PPO model
+maskable_model = MaskablePPO.load("agents/kori_khel/maskable_ppo_kori_khel.zip")
+
+# Load Standard PPO model
+ppo_model = PPO.load("agents/kori_khel/ppo_kori_khel.zip")
+```

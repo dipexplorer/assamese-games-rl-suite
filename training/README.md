@@ -1,25 +1,24 @@
-# training/
+# Training Module
 
-## What is this?
-Training scripts and configuration files for running RL experiments.
+Contains policy training scripts, TensorBoard logging configurations, and hyperparameter schedules.
 
-## Why does it exist?
-This folder contains the scripts that actually run the training loop —
-setting hyperparameters, choosing algorithms, logging progress.
+## Module Structure
 
-Separating training config from the game code means you can easily
-run different experiments (e.g., PPO vs DQN, different reward functions)
-without changing the game environment.
-
-## Files (will be added)
 ```
 training/
 └── kori_khel/
-    ├── train_ppo.py        ← Run PPO training
-    ├── config_ppo.yaml     ← Hyperparameters (lr, steps, gamma...)
-    └── train_dqn.py        ← Compare with DQN
+    ├── train_ppo.py           # Standard PPO baseline training (1.0M timesteps)
+    ├── train_maskable_ppo.py  # Tuned Maskable PPO training (2.0M timesteps)
+    ├── logs/                  # Standard PPO Monitor & TensorBoard logs
+    └── logs_maskable/         # Maskable PPO Monitor & TensorBoard logs
 ```
 
-## Resume value
-Shows you understand **reproducible ML** — a core skill in any ML/AI job.
-Separating config from code is standard industry practice.
+## Running Training
+
+```bash
+# Train Maskable PPO Agent
+python -m training.kori_khel.train_maskable_ppo
+
+# Train Standard PPO Baseline Agent
+python -m training.kori_khel.train_ppo
+```
