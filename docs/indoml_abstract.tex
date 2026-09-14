@@ -17,9 +17,11 @@
 \setlength{\heavyrulewidth}{0.4pt}
 \setlength{\lightrulewidth}{0.25pt}
 
-% --- SECTION SPACING ---
-\titlespacing*{\section}{0pt}{7pt}{3pt}
-\titlespacing*{\subsection}{0pt}{5pt}{2pt}
+% --- SECTION STYLING & SPACING ---
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titlespacing*{\subsection}{0pt}{6pt}{3pt}
 
 \hypersetup{
     colorlinks=true,
@@ -132,7 +134,7 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.96\linewidth]{../evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png}
+\includegraphics[width=0.98\linewidth]{../evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png}
 \caption{Head-to-Head 1,000-Game Benchmark Comparison across Win Rate (\%), Rule Adherence (\%), and Average Episode Reward (pts).}
 \label{fig:benchmark_comparison}
 \end{figure}
@@ -140,12 +142,12 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \subsection{Analytical Insights}
 Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1.0M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{36.20\% win rate} after 2.0M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=0.96\linewidth]{../evaluation/kori_khel/plots/training_curves_comparison.png}
-\caption{Training Trajectory Comparison over Training Timesteps showing moving average reward and episode length convergence.}
+\includegraphics[width=0.92\textwidth]{../evaluation/kori_khel/plots/training_curves_comparison.png}
+\caption{Training Trajectory Comparison over 2.0 Million Timesteps showing moving average reward and episode length convergence.}
 \label{fig:learning_curves}
-\end{figure}
+\end{figure*}
 
 % --- SECTION 5: CONCLUSION & FUTURE WORK ---
 \section{Conclusion \& Future Work}
