@@ -42,7 +42,7 @@ def test_random_agent_gym_env(episodes=5):
             if step_count % 50 == 0:
                 print(f"Episode {ep+1} | Step {step_count:4d} | Roll: {roll:2d} | Action: {action} | Step Reward: {reward:6.2f} | Total Reward: {total_reward:6.2f}")
                 
-        print(f"✨ Episode {ep+1} Finished | Total Steps: {step_count} | Total Reward: {total_reward:6.2f} | Winner: Player {env.engine.winner}")
+        print(f"Episode {ep+1} Finished | Total Steps: {step_count} | Total Reward: {total_reward:6.2f} | Winner: Player {env.engine.winner}")
         print("-" * 70)
         
     print("Gymnasium Environment verification successful! All transitions and reward scaling worked without errors.")
