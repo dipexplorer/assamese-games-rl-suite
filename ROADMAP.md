@@ -4,8 +4,8 @@
 - [x] **Kori Khel Rules & Board Formalization:** Exact 73-state anti-clockwise spiral MDP geometry & cowrie binomial probability model finalized.
 - [x] **Pure Game Engine:** `game_engines/kori_khel/engine.py` built and tested.
 - [x] **Gymnasium Environment:** `KoriKhelEnv` (`environments/kori_khel_env.py`) wrapped and action-masking supported.
-- [x] **RL Agent Training:** Maskable PPO trained for 1,000,000 steps (`train_maskable_ppo.py`).
-- [x] **Benchmark Evaluation:** Evaluated 100 benchmark matches (**30.00% Win Rate**, 100% Rule Adherence).
+- [x] **RL Agent Training:** Maskable PPO trained for 2,000,000 steps (`train_maskable_ppo.py`).
+- [x] **Benchmark Evaluation:** Evaluated 1,000 benchmark matches (**36.20% Win Rate**, 100% Rule Adherence).
 - [x] **Interactive Web Visualizer:** Flask multi-game hub and live interactive board UI with physical cowrie tray.
 - [x] **IndoML 2026 Submission Draft:** 2-Page Extended Abstract (`.tex` & `.md`) with TikZ diagrams and LaTeX code.
 
