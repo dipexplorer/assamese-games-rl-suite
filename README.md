@@ -1,6 +1,6 @@
-# Kori Khel: Reinforcement Learning Environment & Baselines for Assamese Board Games
+# Assamese Traditional Games Reinforcement Learning Suite
 
-Official repository for the Gymnasium environment and reinforcement learning baselines for **Kori Khel**, a traditional 4-player stochastic cowrie-shell board game native to Assam, India.
+Official repository for computational formalizations, OpenAI Gymnasium environments, and reinforcement learning baselines for traditional indigenous games native to Assam, India.
 
 > **Paper**: *Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel*
 
@@ -8,16 +8,28 @@ Official repository for the Gymnasium environment and reinforcement learning bas
 
 ## Overview
 
-Kori Khel is a 4-player race game played with 6 cowrie shells. It features asymmetric stochastic dice outcomes and a strict entry constraint: tokens remain trapped off-board ($s=0$) until an exact entry roll (*Jagowa*, roll of 10) is thrown.
+Indigenous multi-agent games feature asymmetric stochastic distributions, complex topological constraints, and non-trivial entry rules that are absent from standard RL benchmark suites. This project aims to formalize a multi-game suite of 5 traditional Assamese games into standardized Gymnasium environments.
 
-This repository provides:
-1. **`KoriKhelEnv-v0`**: An OpenAI Gymnasium-compatible environment mapping the physical 2D cross board into a 73-state 1D Markov Decision Process (MDP) per player.
-2. **30D Feature Vector**: A state representation $\mathbf{o} \in \mathbb{Z}^{30}$ capturing token positions, roll value, bonus status, projected captures, safe-zone landings, and rear threat distances.
-3. **Invalid Action Masking**: Implementations comparing Standard PPO against Maskable PPO to evaluate policy validity under severe entry bottlenecks.
+### Suite Roadmap & Initial Case Study
+
+* **Game 1 (Initial Release — `KoriKhelEnv-v0`)**: **Kori Khel**, a 4-player stochastic cowrie-shell race game featuring a 73-state 1D Markov Decision Process (MDP) per player, a 30D observation space, and invalid action masking to overcome severe entry bottlenecks.
+* **Upcoming Environments**: Multi-agent pursuit mechanics (*Dhop Khel*), spatial navigation under partial observability (*Tekeli Bhonga*), collision dynamics (*Koni Juj*), and continuous territory control (*Ha-Doo-Doo*).
 
 ---
 
-## Experimental Benchmarks
+## Game 1: Kori Khel (`KoriKhelEnv-v0`)
+
+Kori Khel is played with 6 cowrie shells ($K \sim \text{Binomial}(6, p=0.5)$). Tokens remain trapped off-board ($s=0$) until an exact entry roll (*Jagowa*, roll of 10) is thrown.
+
+### Environment & Architecture
+
+1. **`KoriKhelEnv-v0`**: Maps physical 2D cross-shaped board geometry into a 73-state 1D MDP per player.
+2. **30D Feature Representation**: State vector $\mathbf{o} \in \mathbb{Z}^{30}$ capturing token positions, roll value, bonus status, projected captures, safe-zone landings, and rear threat distances.
+3. **Invalid Action Masking**: Solves entry-state bottlenecks where unmasked policy gradient methods get trapped in illegal-action penalty minima.
+
+---
+
+## Experimental Benchmarks (Kori Khel)
 
 Models were evaluated across a 1,000-game head-to-head benchmark against 3 rule-compliant heuristic opponents.
 
@@ -44,9 +56,9 @@ Models were evaluated across a 1,000-game head-to-head benchmark against 3 rule-
 
 ```
 .
-├── environments/               # Gymnasium environment wrapper
-│   └── kori_khel_env.py        # 73-state 1D MDP Kori Khel environment
-├── game_engines/               # Pure Python game rules & state engine
+├── environments/               # Gymnasium environment wrappers
+│   └── kori_khel_env.py        # Kori Khel 73-state 1D MDP environment
+├── game_engines/               # Pure Python game rules & state engines
 │   └── kori_khel/
 │       └── engine.py           # Core movement, safe zones, and dice mechanics
 ├── training/                   # Policy training scripts
