@@ -2,7 +2,7 @@
 
 % --- PACKAGES ---
 \usepackage[utf8]{inputenc}
-\usepackage[margin=0.65in]{geometry}
+\usepackage[top=0.5in, bottom=0.55in, left=0.6in, right=0.6in]{geometry}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
 \usepackage{graphicx}
@@ -10,6 +10,7 @@
 \usepackage{enumitem}
 \usepackage{microtype}
 \usepackage{xcolor}
+\usepackage{balance}
 
 \hypersetup{
     colorlinks=true,
@@ -18,8 +19,28 @@
     urlcolor=blue
 }
 
+% --- REDUCE TITLE SPACING ---
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vspace{-1.5em}%
+  \begin{center}%
+  \let \footnote \footnote
+    {\Large \bfseries \@title \par}%
+    \vspace{0.6em}%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+  \end{center}%
+  \par
+  \vspace{0.4em}}
+\makeatother
+
 % --- TITLE & AUTHOR INFO ---
-\title{\textbf{\Large Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel}}
+\title{Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel}
 
 \author{
     \textbf{Dipjyoti Das}\textsuperscript{1}, \textbf{Simanta Sharma}\textsuperscript{1}, \textbf{Rupam Bhattacharyya}\textsuperscript{1} (Advisor) \\
@@ -44,7 +65,7 @@ Reinforcement Learning (RL) benchmark environments are predominantly focused on 
 \textbf{Kori Khel} is a 4-player cowrie-shell race game played across rural Assam, structurally resembling Pachisi/Ludo but characterized by a highly skewed binomial dice distribution and a strict entry constraint: tokens remain trapped off-board ($s=0$) until an exact roll (\textit{Jagowa}) is obtained. This entry rule induces a severely bottlenecked action space where reward-penalty shaping fails to guide unmasked policy gradient methods, making Kori Khel an ideal testbed for invalid action masking techniques.
 
 While RL has been benchmarked extensively on Chess, Go, and StarCraft II, regional games such as Kori Khel lack computational state-space definitions. In this work, we formalize Kori Khel from scratch, establishing:
-\begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=1.5pt]
     \item A formal state-space specification of Kori Khel, mapping its physical 2D cross grid to a 73-state 1D coordinate system.
     \item An open-source OpenAI Gymnasium environment (\texttt{KoriKhelEnv}).
     \item Comparative baseline benchmarks evaluating Standard PPO versus Maskable PPO under stochastic dice conditions.
@@ -59,7 +80,7 @@ Kori Khel is played with 6 cowrie shells (\textit{kori}). The outcome of a throw
 \mathbb{P}(K = k) = \binom{6}{k} (0.5)^6
 \end{equation}
 
-\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1.5pt]
     \item \textbf{Pochi ($k=5$, 1 Open, 5 Closed):} 25 steps + Bonus Turn ($\mathbb{P} \approx 9.38\%$).
     \item \textbf{Jagowa ($k=1$, 5 Open, 1 Closed):} 10 steps + Bonus Turn ($\mathbb{P} \approx 9.38\%$) --- \textit{Mandatory entry roll required to release tokens from Base.}
     \item \textbf{Mudra ($k=0$, 6 Open, 0 Closed):} 12 steps + Bonus Turn ($\mathbb{P} \approx 1.56\%$).
@@ -69,7 +90,7 @@ Kori Khel is played with 6 cowrie shells (\textit{kori}). The outcome of a throw
 
 \subsection{Board Abstraction \& MDP Mapping}
 The physical board consists of 4 arms arranged in a cross ($+$), each with 3 columns of 8 cells. We map this 2D geometry into a \textbf{1D state sequence of 73 positions} for each player:
-\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1.5pt]
     \item \textbf{State $s = 0$ (Base):} Token is inactive off-board; requires a \textit{Jagowa} (10) roll to enter state $1$.
     \item \textbf{States $s \in [1, 64]$ (Shared Outer Perimeter):} Shared 64-cell track traversed in a strict global \textbf{Anti-Clockwise} spiral across the 4 board arms. Collisions on non-safe cells result in capture (\textit{"Khua"}), returning the opponent to $0$.
     \item \textbf{Safe Zones ($X$ Marks):} 8 designated sanctuary cells (Row 4 outer cells on perimeter) where collisions do not trigger capture ($s \in \{5, 12, 21, 28, 37, 44, 53, 60\}$).
@@ -81,7 +102,7 @@ The physical board consists of 4 arms arranged in a cross ($+$), each with 3 col
 \section{Reinforcement Learning Architecture}
 
 \subsection{Observation \& Action Spaces}
-\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1.5pt]
     \item \textbf{Observation Vector $\mathbf{o} \in \mathbb{Z}^{17}$:} Formatted as $[s_{0..3}, s^{\text{rel}}_{1..12}, r]$. We represent the 4 active agent token positions absolute ($s \in [0,73]$), while the 12 opponent token positions (3 opponents $\times$ 4 tokens) are mapped \textit{relative} to the agent's start index to maintain rotational invariance across player seats. $r \in [0,25]$ denotes the current roll.
     \item \textbf{Action Space $a \in \{0, 1, 2, 3\}$:} Discrete action selecting which of the 4 agent tokens to advance.
 \end{itemize}
@@ -97,7 +118,7 @@ where $r_{\text{progress}} = +0.1 \times (s' - s)$, $r_{\text{capture}} = +20.0$
 % --- SECTION 4: EMPIRICAL EVALUATION ---
 \section{Empirical Benchmarks \& Results}
 We trained Standard PPO for \textbf{1.0M timesteps} and Maskable PPO for \textbf{2.0M timesteps} against 3 rule-compliant heuristic opponents:
-\begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=1.5pt]
     \item \textbf{Standard PPO (Unmasked, 1.0M):} Relies on penalty shaping ($r_{\text{invalid}} = -2.0$) to learn valid moves.
     \item \textbf{Maskable PPO (Masked, 2.0M):} Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
 \end{enumerate}
@@ -122,14 +143,14 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.98\linewidth]{../evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png}
+\includegraphics[width=1.0\linewidth]{../evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png}
 \caption{Head-to-Head 1,000-Game Benchmark Comparison across Win Rate (\%), Rule Adherence (\%), and Average Episode Reward (pts).}
 \label{fig:benchmark_comparison}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.98\linewidth]{../evaluation/kori_khel/plots/training_curves_comparison.png}
+\includegraphics[width=1.0\linewidth]{../evaluation/kori_khel/plots/training_curves_comparison.png}
 \caption{Training Trajectory Comparison over Training Timesteps showing moving average reward and episode length convergence.}
 \label{fig:learning_curves}
 \end{figure}
@@ -141,14 +162,18 @@ Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adhere
 \section{Conclusion \& Future Work}
 This paper presented a formal MDP abstraction and Gymnasium benchmark environment for Kori Khel, proving that action masking is essential for overcoming entry-roll bottlenecks. Extending this framework to other regional games requires tailored state-space adaptations; for instance, formalizing \textbf{Dhop Khel} necessitates transitioning from our 73-state discrete single-track MDP to a continuous 2D spatial coordinate system with multi-agent ball-possession and tagging dynamics under partial observability.
 
+\balance
+
 % --- REFERENCES ---
 \begin{thebibliography}{9}
 \small
-\setlength{\itemsep}{0pt}
+\setlength{\itemsep}{1pt}
 \setlength{\parskip}{0pt}
 \bibitem{ppo} J. Schulman et al., ``Proximal Policy Optimization Algorithms,'' \textit{arXiv:1707.06347}, 2017.
 \bibitem{masking} S. Huang and S. Ontañón, ``A Closer Look at Invalid Action Masking in Policy Gradient Algorithms,'' \textit{FLAIRS Conference}, 2022.
 \bibitem{gymnasium} M. Towers et al., ``Gymnasium: A Standard Interface for Reinforcement Learning Environments,'' \textit{arXiv:2407.17032}, 2024.
+\bibitem{dota2} C. Berner et al., ``Dota 2 with Large Scale Deep Reinforcement Learning,'' \textit{arXiv:1912.06680}, 2019.
+\bibitem{sutton} R. S. Sutton and A. G. Barto, \textit{Reinforcement Learning: An Introduction}, MIT Press, 2018.
 \end{thebibliography}
 
 \end{document}
