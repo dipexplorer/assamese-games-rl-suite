@@ -2,7 +2,7 @@
 
 % --- PACKAGES ---
 \usepackage[utf8]{inputenc}
-\usepackage[margin=0.75in]{geometry}
+\usepackage[margin=0.65in]{geometry}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
 \usepackage{graphicx}
@@ -19,7 +19,7 @@
 }
 
 % --- TITLE & AUTHOR INFO ---
-\title{\textbf{Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel}}
+\title{\textbf{\Large Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel}}
 
 \author{
     \textbf{Dipjyoti Das}\textsuperscript{1}, \textbf{Simanta Sharma}\textsuperscript{1}, \textbf{Rupam Bhattacharyya}\textsuperscript{1} (Advisor) \\
@@ -44,7 +44,7 @@ Reinforcement Learning (RL) benchmark environments are predominantly focused on 
 \textbf{Kori Khel} is a 4-player cowrie-shell race game played across rural Assam, structurally resembling Pachisi/Ludo but characterized by a highly skewed binomial dice distribution and a strict entry constraint: tokens remain trapped off-board ($s=0$) until an exact roll (\textit{Jagowa}) is obtained. This entry rule induces a severely bottlenecked action space where reward-penalty shaping fails to guide unmasked policy gradient methods, making Kori Khel an ideal testbed for invalid action masking techniques.
 
 While RL has been benchmarked extensively on Chess, Go, and StarCraft II, regional games such as Kori Khel lack computational state-space definitions. In this work, we formalize Kori Khel from scratch, establishing:
-\begin{enumerate}[leftmargin=*,noitemsep,topsep=2pt]
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
     \item A formal state-space specification of Kori Khel, mapping its physical 2D cross grid to a 73-state 1D coordinate system.
     \item An open-source OpenAI Gymnasium environment (\texttt{KoriKhelEnv}).
     \item Comparative baseline benchmarks evaluating Standard PPO versus Maskable PPO under stochastic dice conditions.
@@ -59,7 +59,7 @@ Kori Khel is played with 6 cowrie shells (\textit{kori}). The outcome of a throw
 \mathbb{P}(K = k) = \binom{6}{k} (0.5)^6
 \end{equation}
 
-\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
     \item \textbf{Pochi ($k=5$, 1 Open, 5 Closed):} 25 steps + Bonus Turn ($\mathbb{P} \approx 9.38\%$).
     \item \textbf{Jagowa ($k=1$, 5 Open, 1 Closed):} 10 steps + Bonus Turn ($\mathbb{P} \approx 9.38\%$) --- \textit{Mandatory entry roll required to release tokens from Base.}
     \item \textbf{Mudra ($k=0$, 6 Open, 0 Closed):} 12 steps + Bonus Turn ($\mathbb{P} \approx 1.56\%$).
@@ -69,7 +69,7 @@ Kori Khel is played with 6 cowrie shells (\textit{kori}). The outcome of a throw
 
 \subsection{Board Abstraction \& MDP Mapping}
 The physical board consists of 4 arms arranged in a cross ($+$), each with 3 columns of 8 cells. We map this 2D geometry into a \textbf{1D state sequence of 73 positions} for each player:
-\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
     \item \textbf{State $s = 0$ (Base):} Token is inactive off-board; requires a \textit{Jagowa} (10) roll to enter state $1$.
     \item \textbf{States $s \in [1, 64]$ (Shared Outer Perimeter):} Shared 64-cell track traversed in a strict global \textbf{Anti-Clockwise} spiral across the 4 board arms. Collisions on non-safe cells result in capture (\textit{"Khua"}), returning the opponent to $0$.
     \item \textbf{Safe Zones ($X$ Marks):} 8 designated sanctuary cells (Row 4 outer cells on perimeter) where collisions do not trigger capture ($s \in \{5, 12, 21, 28, 37, 44, 53, 60\}$).
@@ -81,7 +81,7 @@ The physical board consists of 4 arms arranged in a cross ($+$), each with 3 col
 \section{Reinforcement Learning Architecture}
 
 \subsection{Observation \& Action Spaces}
-\begin{itemize}[leftmargin=*,noitemsep,topsep=2pt]
+\begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
     \item \textbf{Observation Vector $\mathbf{o} \in \mathbb{Z}^{17}$:} Formatted as $[s_{0..3}, s^{\text{rel}}_{1..12}, r]$. We represent the 4 active agent token positions absolute ($s \in [0,73]$), while the 12 opponent token positions (3 opponents $\times$ 4 tokens) are mapped \textit{relative} to the agent's start index to maintain rotational invariance across player seats. $r \in [0,25]$ denotes the current roll.
     \item \textbf{Action Space $a \in \{0, 1, 2, 3\}$:} Discrete action selecting which of the 4 agent tokens to advance.
 \end{itemize}
@@ -96,17 +96,17 @@ where $r_{\text{progress}} = +0.1 \times (s' - s)$, $r_{\text{capture}} = +20.0$
 
 % --- SECTION 4: EMPIRICAL EVALUATION ---
 \section{Empirical Benchmarks \& Results}
-We trained Standard PPO for \textbf{1,000,000 (1.0M) timesteps} and Maskable PPO for \textbf{2,000,000 (2.0M) timesteps} against 3 rule-compliant heuristic opponents:
-\begin{enumerate}[leftmargin=*,noitemsep,topsep=2pt]
-    \item \textbf{Standard PPO (Unmasked, 1.0M Steps):} Relies on penalty shaping ($r_{\text{invalid}} = -2.0$) to learn valid moves.
-    \item \textbf{Maskable PPO (Masked, 2.0M Steps):} Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
+We trained Standard PPO for \textbf{1.0M timesteps} and Maskable PPO for \textbf{2.0M timesteps} against 3 rule-compliant heuristic opponents:
+\begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
+    \item \textbf{Standard PPO (Unmasked, 1.0M):} Relies on penalty shaping ($r_{\text{invalid}} = -2.0$) to learn valid moves.
+    \item \textbf{Maskable PPO (Masked, 2.0M):} Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
 \end{enumerate}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
-\caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1.0M timesteps, Maskable PPO: 2.0M timesteps).}
+\caption{Head-to-head benchmark performance over 1,000 matches (Standard PPO: 1.0M, Maskable PPO: 2.0M).}
 \label{tab:results}
-\small
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{lcc}
 \toprule
 \textbf{Metric} & \textbf{Standard PPO (1.0M)} & \textbf{Maskable PPO (2.0M)} \\
@@ -116,7 +116,8 @@ Rule Adherence (\%) & 72.80\% & \textbf{100.00\%} \\
 Avg Episode Length & 94.2 turns & \textbf{59.5 turns} \\
 Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 \begin{figure}[htbp]
@@ -139,14 +140,5 @@ Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adhere
 % --- SECTION 5: CONCLUSION & FUTURE WORK ---
 \section{Conclusion \& Future Work}
 This paper presented a formal MDP abstraction and Gymnasium benchmark environment for Kori Khel, proving that action masking is essential for overcoming entry-roll bottlenecks. Extending this framework to other regional games requires tailored state-space adaptations; for instance, formalizing \textbf{Dhop Khel} necessitates transitioning from our 73-state discrete single-track MDP to a continuous 2D spatial coordinate system with multi-agent ball-possession and tagging dynamics under partial observability.
-
-% --- REFERENCES ---
-\begin{thebibliography}{99}
-\small
-\bibitem{dota2} C. Berner et al., ``Dota 2 with Large Scale Deep Reinforcement Learning,'' \textit{arXiv:1912.06680}, 2019.
-\bibitem{masking} S. Huang and S. Ontañón, ``A Closer Look at Invalid Action Masking in Policy Gradient Algorithms,'' \textit{FLAIRS Conference}, 2022.
-\bibitem{ppo} J. Schulman et al., ``Proximal Policy Optimization Algorithms,'' \textit{arXiv:1707.06347}, 2017.
-\bibitem{sutton} R. S. Sutton and A. G. Barto, \textit{Reinforcement Learning: An Introduction}, MIT Press, 2018.
-\end{thebibliography}
 
 \end{document}

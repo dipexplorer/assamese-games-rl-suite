@@ -101,12 +101,3 @@ Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adhere
 ## 5. Conclusion & Future Work
 
 This paper presented a formal MDP abstraction and Gymnasium benchmark environment for Kori Khel, proving that action masking is essential for overcoming entry-roll bottlenecks. Extending this framework to other regional games requires tailored state-space adaptations; for instance, formalizing **Dhop Khel** necessitates transitioning from our 73-state discrete single-track MDP to a continuous 2D spatial coordinate system with multi-agent ball-possession and tagging dynamics under partial observability.
-
----
-
-## 6. References
-
-1. **Berner, C., et al. (2019).** _Dota 2 with Large Scale Deep Reinforcement Learning._ arXiv:1912.06680.
-2. **Huang, S., & Ontañón, S. (2022).** _A Closer Look at Invalid Action Masking in Policy Gradient Algorithms._ FLAIRS Conference.
-3. **Schulman, J., et al. (2017).** _Proximal Policy Optimization Algorithms._ arXiv:1707.06347.
-4. **Sutton, R. S., & Barto, A. G. (2018).** _Reinforcement Learning: An Introduction._ MIT Press.
