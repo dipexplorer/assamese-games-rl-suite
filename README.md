@@ -1,54 +1,44 @@
 # Assamese Traditional Games Reinforcement Learning Suite
 
-Official repository for computational formalizations, OpenAI Gymnasium environments, and reinforcement learning baselines for traditional indigenous games native to Assam, India.
-
-> **Paper**: *Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel*
+An open-source suite of OpenAI Gymnasium environments and baseline RL algorithms for traditional indigenous games native to Assam, India.
 
 ---
 
 ## Overview
 
-Indigenous multi-agent games feature asymmetric stochastic distributions, complex topological constraints, and non-trivial entry rules that are absent from standard RL benchmark suites. This project aims to formalize a multi-game suite of 5 traditional Assamese games into standardized Gymnasium environments.
+Traditional games often feature unique board layouts, random dice rolls, and strict entry rules that make them great testbeds for Reinforcement Learning (RL). 
 
-### Suite Roadmap & Initial Case Study
+This project aims to build RL environments for traditional Assamese games. **Kori Khel** is the first game released in this suite, with more games planned.
 
-* **Game 1 (Initial Release — `KoriKhelEnv-v0`)**: **Kori Khel**, a 4-player stochastic cowrie-shell race game featuring a 73-state 1D Markov Decision Process (MDP) per player, a 30D observation space, and invalid action masking to overcome severe entry bottlenecks.
-* **Upcoming Environments**: Multi-agent pursuit mechanics (*Dhop Khel*), spatial navigation under partial observability (*Tekeli Bhonga*), collision dynamics (*Koni Juj*), and continuous territory control (*Ha-Doo-Doo*).
+### Game 1: Kori Khel (`KoriKhelEnv-v0`)
 
----
+Kori Khel is a 4-player board game played with 6 cowrie shells. The shells act as dice: each shell lands face-up or face-down with a 50% chance, determining how many steps a player can move.
 
-## Game 1: Kori Khel (`KoriKhelEnv-v0`)
-
-Kori Khel is played with 6 cowrie shells ($K \sim \text{Binomial}(6, p=0.5)$). Tokens remain trapped off-board ($s=0$) until an exact entry roll (*Jagowa*, roll of 10) is thrown.
-
-### Environment & Architecture
-
-1. **`KoriKhelEnv-v0`**: Maps physical 2D cross-shaped board geometry into a 73-state 1D MDP per player.
-2. **30D Feature Representation**: State vector $\mathbf{o} \in \mathbb{Z}^{30}$ capturing token positions, roll value, bonus status, projected captures, safe-zone landings, and rear threat distances.
-3. **Invalid Action Masking**: Solves entry-state bottlenecks where unmasked policy gradient methods get trapped in illegal-action penalty minima.
+- **Board Layout**: The board is mapped to a 73-position track for each player (Base at position 0, main perimeter from 1 to 64, home corridor from 65 to 72, and Goal at 73).
+- **Entry Constraint**: Tokens start at Base (position 0) and can only enter the board when the player rolls a **Jagowa** (a roll value of 10, achieved when 5 shells land open and 1 lands closed).
+- **30-Feature Observation Vector**: The environment provides 30 state features to the agent, including token positions, current dice roll, bonus turn flag, capture opportunities, safe zone landings, and threat distances.
+- **Action Masking**: Because tokens cannot move from Base without a roll of 10, standard RL agents can get stuck sampling illegal moves. We use **Maskable PPO** to restrict action choices strictly to legal moves.
 
 ---
 
-## Experimental Benchmarks (Kori Khel)
+## Benchmark Results (Kori Khel)
 
-Models were evaluated across a 1,000-game head-to-head benchmark against 3 rule-compliant heuristic opponents.
+We evaluated **Standard PPO** (trained for 1 million steps) against **Maskable PPO** (trained for 2 million steps) across 1,000 matches against rule-compliant heuristic opponents.
 
-### Performance Comparison (1,000 Games)
-
-| Metric | Standard PPO (1M Steps) | Maskable PPO (2M Steps) | Advantage |
-| :--- | :---: | :---: | :---: |
-| **Win Rate (%)** | 28.30% | **36.20%** | +27.9% relative win rate |
-| **Rule Adherence (%)** | 72.80% | **100.00%** | 100% legal action selection |
-| **Average Episode Length** | 94.2 turns | **59.5 turns** | ~37% faster match completion |
-| **Average Episode Reward** | +80.93 pts | **+108.90 pts** | Higher reward efficiency |
+| Metric | Standard PPO (1M Steps) | Maskable PPO (2M Steps) | Notes |
+| :--- | :---: | :---: | :--- |
+| **Win Rate (%)** | 28.30% | **36.20%** | Higher win rate against 3 heuristic opponents |
+| **Rule Adherence (%)** | 72.80% | **100.00%** | Maskable PPO never plays an illegal move |
+| **Average Episode Length** | 94.2 turns | **59.5 turns** | Completes games ~37% faster |
+| **Average Episode Reward** | +80.93 pts | **+108.90 pts** | Earns higher average game score |
 
 ### Evaluation Plots
 
 ![Head-to-Head Benchmark Comparison](evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png)  
-*Figure 1: Head-to-head 1,000-game benchmark metrics comparing Standard PPO and Maskable PPO.*
+*Figure 1: Benchmark comparison showing Win Rate, Rule Adherence, and Episode Reward across 1,000 games.*
 
 ![Training Trajectories Comparison](evaluation/kori_khel/plots/training_curves_comparison.png)  
-*Figure 2: Training trajectories over 2 million timesteps showing moving average reward and episode length.*
+*Figure 2: Training progress over 2 million steps showing episode reward and episode length.*
 
 ---
 
@@ -57,24 +47,24 @@ Models were evaluated across a 1,000-game head-to-head benchmark against 3 rule-
 ```
 .
 ├── environments/               # Gymnasium environment wrappers
-│   └── kori_khel_env.py        # Kori Khel 73-state 1D MDP environment
-├── game_engines/               # Pure Python game rules & state engines
+│   └── kori_khel_env.py        # Kori Khel environment (KoriKhelEnv-v0)
+├── game_engines/               # Pure Python game engine & rules
 │   └── kori_khel/
-│       └── engine.py           # Core movement, safe zones, and dice mechanics
-├── training/                   # Policy training scripts
+│       └── engine.py           # Movement logic, safe zones, and dice mechanics
+├── training/                   # Baseline training scripts
 │   └── kori_khel/
-│       ├── train_ppo.py        # Standard PPO trainer
-│       └── train_maskable_ppo.py # Maskable PPO trainer
-├── evaluation/                 # Benchmark evaluation & figure generation
+│       ├── train_ppo.py        # Standard PPO training script
+│       └── train_maskable_ppo.py # Maskable PPO training script
+├── evaluation/                 # Benchmark evaluation & plotting scripts
 │   └── kori_khel/
 │       ├── evaluate_maskable_ppo.py # 1,000-game evaluation benchmark
 │       ├── generate_benchmark_plots.py # Plot generation script
-│       └── plots/              # Benchmark plots
-├── visualization/              # Web GUI & interactive board renderer
+│       └── plots/              # Benchmark output plots
+├── visualization/              # Interactive Web UI
 │   ├── gui_server.py           # Flask server
-│   └── templates/index.html    # Board rendering interface
+│   └── templates/index.html    # Interactive board UI
 └── docs/                       # Research paper source files
-    ├── indoml_abstract.tex     # Camera-ready LaTeX paper source
+    ├── indoml_abstract.tex     # LaTeX source
     └── indoml_abstract.md      # Extended abstract markdown
 ```
 
@@ -84,7 +74,7 @@ Models were evaluated across a 1,000-game head-to-head benchmark against 3 rule-
 
 ### 1. Installation
 
-Requires Python 3.10 or higher.
+Python 3.10 or higher is required.
 
 ```bash
 git clone https://github.com/dipexplorer/assamese-games-rl-suite.git
@@ -96,37 +86,37 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e .
 ```
 
-### 2. Training Baselines
+### 2. Train Baselines
 
-Train Maskable PPO (2M timesteps):
+Train Maskable PPO (2 million steps):
 ```bash
 python -m training.kori_khel.train_maskable_ppo
 ```
 
-Train Standard PPO (1M timesteps):
+Train Standard PPO (1 million steps):
 ```bash
 python -m training.kori_khel.train_ppo
 ```
 
-### 3. Running Evaluation & Generating Plots
+### 3. Run Benchmark & Generate Plots
 
-Run 1,000-game benchmark evaluation:
+Run the 1,000-game evaluation:
 ```bash
 python -m evaluation.kori_khel.evaluate_maskable_ppo
 ```
 
-Re-generate benchmark comparison plots:
+Re-generate comparison plots:
 ```bash
 python -m evaluation.kori_khel.generate_benchmark_plots
 ```
 
 ### 4. Interactive Web Interface
 
-Launch the interactive web renderer to step through matches:
+Launch the web board interface to watch or play steps:
 ```bash
 python -m visualization.gui_server
 ```
-Open `http://127.0.0.1:5000` in a web browser.
+Open `http://127.0.0.1:5000` in your web browser.
 
 ---
 
