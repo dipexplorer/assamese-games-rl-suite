@@ -46,7 +46,7 @@
 
 % --- ABSTRACT ---
 \begin{abstract}
-Reinforcement Learning (RL) benchmark environments have focused primarily on standardized Western board and video games. Consequently, indigenous multi-agent board games featuring asymmetric stochastic dynamics and complex topological constraints remain largely unmodeled in standard RL benchmark suites. In this paper, we present a computational formalization and Gymnasium environment for \textbf{Kori Khel}, a traditional 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the physical 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate policy gradient baselines using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (1.0M timesteps) and invalid action masking (2.0M timesteps). Across a 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (72.8\% rule adherence, 28.30\% win rate) due to severe entry-state bottlenecks. In contrast, Maskable PPO achieves 100.0\% rule adherence, an average episode reward of +108.90, and a \textbf{36.20\% win rate} against rule-compliant opponents in a 4-player setting (outperforming the 25.0\% random baseline). We analyze the mathematical necessity of action masking in stochastic games with hard entry constraints and outline directions toward formalizing broader suites of regional games.
+Reinforcement Learning (RL) benchmark environments have focused primarily on standardized Western board and video games. Consequently, indigenous multi-agent board games featuring asymmetric stochastic dynamics and complex topological constraints remain largely unmodeled in standard RL benchmark suites. In this paper, we present a computational formalization and Gymnasium environment for \textbf{Kori Khel}, a traditional 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the physical 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate policy gradient baselines using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (1M timesteps) and invalid action masking (2M timesteps). Across a 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (72.8\% rule adherence, 28.30\% win rate) due to severe entry-state bottlenecks. In contrast, Maskable PPO achieves 100\% rule adherence, an average episode reward of +108.90, and a \textbf{36.20\% win rate} against rule-compliant opponents in a 4-player setting (outperforming the 25.0\% random baseline). We analyze the mathematical necessity of action masking in stochastic games with hard entry constraints and outline directions toward formalizing broader suites of regional games.
 \end{abstract}
 
 \textbf{\small Keywords---} Reinforcement Learning, Proximal Policy Optimization, Action Masking, Game Formalization, Kori Khel.
@@ -83,10 +83,10 @@ Kori Khel is played with 6 cowrie shells (\textit{kori}). The outcome of a throw
 The physical board consists of 4 arms arranged in a cross ($+$), each with 3 columns of 8 cells. We map this 2D geometry into a \textbf{1D state sequence of 73 positions} for each player:
 \begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
     \item \textbf{State $s = 0$ (Base):} Token is inactive off-board; requires a \textit{Jagowa} (10) roll to enter state $1$.
-    \item \textbf{States $s \in [1, 64]$ (Shared Outer Perimeter):} Shared 64-cell track traversed in a strict global \textbf{Anti-Clockwise} spiral across the 4 board arms. Collisions on non-safe cells result in capture (\textit{"Khua"}), returning the opponent to $0$.
+    \item \textbf{States $s \in [1, 64]$ (Shared Outer Perimeter):} Shared 64-cell track traversed in a strict global counter-clockwise spiral across the 4 board arms. Collisions on non-safe cells result in capture (\textit{Khua}), returning the opponent to $0$.
     \item \textbf{Safe Zones ($X$ Marks):} 8 designated sanctuary cells (Row 4 outer cells on perimeter) where collisions do not trigger capture ($s \in \{5, 12, 21, 28, 37, 44, 53, 60\}$).
     \item \textbf{States $s \in [65, 72]$ (Private Home Corridor):} Private 8-cell central corridor leading to the center.
-    \item \textbf{State $s = 73$ (Ghai / Goal):} Terminal winning state (\textit{"Pokoa"}). First player to move all 4 tokens to 73 wins.
+    \item \textbf{State $s = 73$ (Ghai / Goal):} Terminal winning state (\textit{Pokoa}). First player to move all 4 tokens to 73 wins.
 \end{itemize}
 
 % --- SECTION 3: RL ARCHITECTURE ---
@@ -102,16 +102,16 @@ The physical board consists of 4 arms arranged in a cross ($+$), each with 3 col
 \begin{equation}
 \mathcal{R}(s, a, s') = r_{\text{progress}} + r_{\text{event}}
 \end{equation}
-where $r_{\text{progress}} = +0.1 \times (s' - s)$, $r_{\text{capture}} = +20.0$, $r_{\text{captured}} = -20.0$, $r_{\text{ghai}} = +30.0$, $r_{\text{win}} = +100.0$ ($r_{\text{loss}} = -100.0$), and $r_{\text{invalid}} = -2.0$ (Standard PPO only).
+where $r_{\text{progress}} = +0.1 \times (s' - s)$, $r_{\text{capture}} = +20$, $r_{\text{captured}} = -20$, $r_{\text{ghai}} = +30$, $r_{\text{win}} = +100$ ($r_{\text{loss}} = -100$), and $r_{\text{invalid}} = -2$ (Standard PPO only).
 
-The magnitude of each reward coefficient is scaled relative to the terminal match outcome ($\pm 100.0$). The intermediate milestone of landing a single token in Ghai ($+30.0$) is weighted below game termination to encourage multi-token coordination. Opponent captures are balanced symmetrically ($\pm 20.0$) to model competitive tactical exchanges without distorting value estimations. Step progress ($+0.1$) is set an order of magnitude smaller to eliminate reward-shaping loops, while $r_{\text{invalid}} = -2.0$ penalizes illegal actions without destabilizing gradient updates.
+The magnitude of each reward coefficient is scaled relative to the terminal match outcome ($\pm 100$). The intermediate milestone of landing a single token in Ghai ($+30$) is weighted below game termination to encourage multi-token coordination. Opponent captures are balanced symmetrically ($\pm 20$) to model competitive tactical exchanges without distorting value estimations. Step progress ($+0.1$) is set an order of magnitude smaller to eliminate reward-shaping loops, while $r_{\text{invalid}} = -2$ penalizes illegal actions without destabilizing gradient updates.
 
 % --- SECTION 4: EMPIRICAL EVALUATION ---
 \section{Empirical Benchmarks \& Results}
-We trained Standard PPO for \textbf{1.0M timesteps} and Maskable PPO for \textbf{2.0M timesteps} against 3 rule-compliant heuristic opponents:
+We trained Standard PPO for \textbf{1M timesteps} and Maskable PPO for \textbf{2M timesteps} against 3 rule-compliant heuristic opponents:
 \begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
-    \item \textbf{Standard PPO (Unmasked, 1.0M):} Relies on penalty shaping ($r_{\text{invalid}} = -2.0$) to learn valid moves.
-    \item \textbf{Maskable PPO (Masked, 2.0M):} Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
+    \item \textbf{Standard PPO (Unmasked, 1M):} Relies on penalty shaping ($r_{\text{invalid}} = -2$) to learn valid moves.
+    \item \textbf{Maskable PPO (Masked, 2M):} Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
 \end{enumerate}
 
 \begin{table}[t]
@@ -140,12 +140,12 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \end{figure}
 
 \subsection{Analytical Insights}
-Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1.0M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{36.20\% win rate} after 2.0M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
+Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{36.20\% win rate} after 2M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.92\textwidth]{../evaluation/kori_khel/plots/training_curves_comparison.png}
-\caption{Training Trajectory Comparison over 2.0 Million Timesteps showing moving average reward and episode length convergence.}
+\caption{Training Trajectory Comparison over 2 million timesteps showing moving average reward and episode length convergence.}
 \label{fig:learning_curves}
 \end{figure*}
 
