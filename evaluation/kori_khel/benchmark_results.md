@@ -1,8 +1,8 @@
 # Kori Khel Standard PPO Agent Evaluation Benchmark
 
 - **Total Games Evaluated:** 1000
-- **Standard PPO Agent Win Rate:** 28.90%
-- **Opponents Win Rate:** 71.10%
-- **Average steps per game:** 53.0
-- **Average episode reward:** 88.24
-- **AI Rule Adherence:** 88.4%
+- **Standard PPO Agent Win Rate:** 28.80%
+- **Opponents Win Rate:** 71.20%
+- **Average steps per game:** 54.4
+- **Average episode reward:** 90.47
+- **AI Rule Adherence:** 88.0%

@@ -2,14 +2,14 @@
 
 **Target Venue:** IndoML 2026 (7th Indian Symposium on Machine Learning) — Undergraduate Forum  
 **Venue & Date:** IIT Kharagpur Kolkata Extension Centre / Research Park | December 18–20, 2026  
-**Authors:** Dipjyoti Das, Simanta Sharma, Rupam Bhattacharyya (Advisor)  
+**Authors:** Dipjyoti Das, Simanta Sarma, Rupam Bhattacharyya (Advisor)  
 **Affiliation:** Department of Information Technology, Gauhati University, Assam, India
 
 ---
 
 ## Abstract
 
-Reinforcement Learning (RL) benchmark environments have focused primarily on standardized Western board and video games. Consequently, indigenous multi-agent board games featuring asymmetric stochastic dynamics and complex topological constraints remain largely unmodeled in standard RL benchmark suites. In this paper, we present a computational formalization and Gymnasium environment for **Kori Khel**, a traditional 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the physical 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate policy gradient baselines using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (1M timesteps) and invalid action masking (2M timesteps). Across a 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (72.8% rule adherence, 28.30% win rate) due to severe entry-state bottlenecks. In contrast, Maskable PPO achieves 100% rule adherence, an average episode reward of +108.90, and a **36.20% win rate** against rule-compliant opponents in a 4-player setting (outperforming the 25.0% random baseline). We analyze the mathematical necessity of action masking in stochastic games with hard entry constraints and outline directions toward formalizing broader suites of regional games.
+Reinforcement Learning (RL) benchmark environments have focused primarily on standardized Western board and video games. Consequently, indigenous multi-agent board games featuring asymmetric stochastic dynamics and complex topological constraints remain largely unmodeled in standard RL benchmark suites. In this paper, we present a computational formalization and Gymnasium environment for **Kori Khel**, a traditional 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the physical 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate policy gradient baselines using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (2M timesteps) and invalid action masking (2M timesteps). Across a 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (88.4% rule adherence, 28.90% win rate) due to severe entry-state bottlenecks. In contrast, Maskable PPO achieves 100% rule adherence, an average episode reward of +115.15, and a **38.10% win rate** against rule-compliant opponents in a 4-player setting (outperforming the 25.0% random baseline). We analyze the mathematical necessity of action masking in stochastic games with hard entry constraints and outline directions toward formalizing broader suites of regional games.
 
 ---
 
@@ -72,19 +72,19 @@ $$\mathcal{R}(s, a, s') = r_{\text{progress}} + r_{\text{event}}$$
 
 ## 4. Empirical Evaluation & Baseline Results
 
-We trained Standard PPO for **1M timesteps** and Maskable PPO for **2M timesteps** against 3 rule-compliant heuristic opponents:
+We trained Standard PPO for **2M timesteps** and Maskable PPO for **2M timesteps** against 3 rule-compliant heuristic opponents:
 
-1. **Standard PPO (Unmasked, 1M Steps):** Relies on penalty shaping ($r_{\text{invalid}} = -2$) to learn valid moves.
+1. **Standard PPO (Unmasked, 2M Steps):** Relies on penalty shaping ($r_{\text{invalid}} = -2$) to learn valid moves.
 2. **Maskable PPO (Masked, 2M Steps):** Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
 
 ### 4.1 Quantitative Performance (1,000-Game Head-to-Head Benchmark)
 
-| Metric                             | Standard PPO (1M Steps) | Maskable PPO (2M Steps, Tuned) |      Relative Advantage      |
+| Metric                             | Standard PPO (2M Steps) | Maskable PPO (2M Steps, Tuned) |      Relative Advantage      |
 | :--------------------------------- | :---------------------: | :----------------------------: | :--------------------------: |
-| **Win Rate (%)**                   |         28.30%          |           **36.20%**           |   **+27.9% Relative Gain**   |
-| **Rule Adherence Rate (%)**        |         72.80%          |          **100.00%**           | **Perfect Policy Validity**  |
-| **Average Episode Length (Turns)** |       94.2 turns        |         **59.5 turns**         |  **~37% Faster Completion**  |
-| **Average Episode Reward**         |       +80.93 pts        |        **+108.90 pts**         | **+34.6% Reward Efficiency** |
+| **Win Rate (%)**                   |         28.90%          |           **38.10%**           |   **+31.8% Relative Gain**   |
+| **Rule Adherence Rate (%)**        |         88.40%          |          **100.00%**           | **Perfect Policy Validity**  |
+| **Average Episode Length (Turns)** |       53.0 turns        |         **59.3 turns**         |  **~10% Slower Completion**  |
+| **Average Episode Reward**         |       +88.24 pts        |        **+115.15 pts**         | **+30.5% Reward Efficiency** |
 
 ![Figure 1: Head-to-Head Benchmark Comparison](../evaluation/kori_khel/plots/ppo_vs_maskable_comparison.png)  
 _Figure 1: Head-to-Head 1,000-Game Benchmark Comparison across Win Rate (%), Rule Adherence (%), and Average Episode Reward (pts)._
@@ -94,7 +94,7 @@ _Figure 2: Training Trajectory Comparison over training timesteps showing moving
 
 ### 4.2 Analytical Insights
 
-Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100% legal play from step 1, achieving a **36.20% win rate** after 2M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
+Standard PPO suffers from persistent invalid move sampling ($88.4\%$ rule adherence even after 2M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100% legal play from step 1, achieving a **38.10% win rate** after 2M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
 
 ---
 

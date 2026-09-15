@@ -23,14 +23,14 @@ Kori Khel is a 4-player board game played with 6 cowrie shells. The shells act a
 
 ## Benchmark Results (Kori Khel)
 
-We evaluated **Standard PPO** (trained for 1 million steps) against **Maskable PPO** (trained for 2 million steps) across 1,000 matches against rule-compliant heuristic opponents.
+We evaluated **Standard PPO** (trained for 2 million steps) against **Maskable PPO** (trained for 2 million steps) across 1,000 matches against rule-compliant heuristic opponents.
 
-| Metric | Standard PPO (1M Steps) | Maskable PPO (2M Steps) | Notes |
+| Metric | Standard PPO (2M Steps) | Maskable PPO (2M Steps) | Notes |
 | :--- | :---: | :---: | :--- |
-| **Win Rate (%)** | 28.30% | **36.20%** | Higher win rate against 3 heuristic opponents |
-| **Rule Adherence (%)** | 72.80% | **100.00%** | Maskable PPO never plays an illegal move |
-| **Average Episode Length** | 94.2 turns | **59.5 turns** | Completes games ~37% faster |
-| **Average Episode Reward** | +80.93 pts | **+108.90 pts** | Earns higher average game score |
+| **Win Rate (%)** | 28.90% | **38.10%** | Higher win rate against 3 heuristic opponents |
+| **Rule Adherence (%)** | 88.40% | **100.00%** | Maskable PPO never plays an illegal move |
+| **Average Episode Length** | 53.0 turns | **59.3 turns** | Completes games faster |
+| **Average Episode Reward** | +88.24 pts | **+115.15 pts** | Earns higher average game score |
 
 ### Evaluation Plots
 
@@ -93,7 +93,7 @@ Train Maskable PPO (2 million steps):
 python -m training.kori_khel.train_maskable_ppo
 ```
 
-Train Standard PPO (1 million steps):
+Train Standard PPO (2 million steps):
 ```bash
 python -m training.kori_khel.train_ppo
 ```
@@ -123,7 +123,7 @@ Open `http://127.0.0.1:5000` in your web browser.
 ## Authors & Affiliation
 
 - **Dipjyoti Das**
-- **Simanta Sharma**
+- **Simanta Sarma**
 - **Rupam Bhattacharyya (Advisor)**
 
 *Department of Information Technology, Gauhati University, Assam, India*
