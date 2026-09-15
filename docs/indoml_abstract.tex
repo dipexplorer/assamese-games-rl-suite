@@ -1,3 +1,4 @@
+
 \documentclass[10pt,twocolumn,a4paper]{article}
 
 % --- PACKAGES ---
@@ -31,11 +32,12 @@
 }
 
 % --- TITLE & AUTHOR INFO ---
-\title{\vspace{-1.2em}\textbf{\Large Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel}\vspace{-0.4em}}
+\title{\vspace{-1.2em}\textbf{\Large %Computational Formalization and Reinforcement Learning Baselines for Assamese Traditional Games: A Case Study on Kori Khel
+KoriKhelEnv: A Gymnasium Reinforcement Learning Environment and Associated Experimentation for a Traditional Assamese Game}\vspace{-0.4em}}
 
 \author{
-    \textbf{Dipjyoti Das}\textsuperscript{1}, \textbf{Simanta Sharma}\textsuperscript{1}, \textbf{Rupam Bhattacharyya}\textsuperscript{1} (Advisor) \\
-    \textsuperscript{1}Department of Information Technology, Gauhati University, Assam, India
+    \textbf{Dipjyoti Das}\textsuperscript{1}, \textbf{Simanta Sarma}\textsuperscript{1}, \textbf{Rupam Bhattacharyya}\textsuperscript{1} \\
+    \textsuperscript{1}Responsible Bot Lab, Department of Information Technology, Gauhati University, Assam, India
 }
 
 \date{\vspace{-2.0em}}
@@ -46,19 +48,28 @@
 
 % --- ABSTRACT ---
 \begin{abstract}
-Reinforcement Learning (RL) benchmark environments have focused primarily on standardized Western board and video games. Consequently, indigenous multi-agent board games featuring asymmetric stochastic dynamics and complex topological constraints remain largely unmodeled in standard RL benchmark suites. In this paper, we present a computational formalization and Gymnasium environment for \textbf{Kori Khel}, a traditional 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the physical 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate policy gradient baselines using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (1M timesteps) and invalid action masking (2M timesteps). Across a 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (72.8\% rule adherence, 28.30\% win rate) due to severe entry-state bottlenecks. In contrast, Maskable PPO achieves 100\% rule adherence, an average episode reward of +108.90, and a \textbf{36.20\% win rate} against rule-compliant opponents in a 4-player setting (outperforming the 25.0\% random baseline). We analyze the mathematical necessity of action masking in stochastic games with hard entry constraints and outline directions toward formalizing broader suites of regional games.
+Digital representation of India’s traditional games should be encouraged to demonstrate the richness of Indian culture. Reinforcement Learning (RL) benchmark environments have focused primarily on standardized Western board and video games. %Consequently, indigenous multi-agent board games featuring asymmetric stochastic dynamics and complex topological constraints remain largely unmodeled in standard RL benchmark suites. 
+In this paper, we present a computational formalization and Gymnasium environment for \textbf{Kori Khel}, a traditional 4-player stochastic cowrie-shell board game native to Assam, India. We abstract the physical 2D cross-shaped board into a 73-state 1D Markov Decision Process (MDP) per player, incorporating asymmetric binomial dice distributions, 8 safe zones, and capture mechanics. We evaluate policy gradient baselines using Proximal Policy Optimization (PPO) under two regimes: standard reward-penalty shaping (2M timesteps) and invalid action masking (2M timesteps). Across a 1,000-game evaluation benchmark, Standard PPO fails to maintain legal play (88.4\% rule adherence, 28.90\% win rate) due to severe entry-state bottlenecks. In contrast, Maskable PPO achieves 100\% rule adherence, an average episode reward of +115.15, and a \textbf{38.10\% win rate} against rule-compliant opponents in a 4-player setting (outperforming the 25.0\% random baseline). %We analyze the mathematical necessity of action masking in stochastic games with hard entry constraints and outline directions toward formalizing broader suites of regional games.
 \end{abstract}
 
-\textbf{\small Keywords---} Reinforcement Learning, Proximal Policy Optimization, Action Masking, Game Formalization, Kori Khel.
+\textbf{\small Keywords---} Reinforcement Learning, Proximal Policy Optimization, Action Masking, Traditional Game Formalization, Kori Khel.
 
 % --- SECTION 1: INTRODUCTION ---
 \section{Introduction}
-\textbf{Kori Khel} is a 4-player cowrie-shell race game played across rural Assam, India. Structurally resembling Pachisi and Ludo, it is characterized by a highly skewed binomial dice distribution and a strict entry constraint: tokens remain trapped off-board ($s=0$) until an exact roll (\textit{Jagowa}) is obtained. This entry rule induces a bottlenecked action space where reward-penalty shaping fails to guide unmasked policy gradient methods, rendering Kori Khel a compelling domain for evaluating invalid action masking techniques.
+\textbf{Kori Khel}\footnote{Figure 1 is adapted from https://itfc.assam.gov.in/} is a 4-player cowrie-shell race game played across rural Assam, India. Structurally resembling Pachisi and Ludo, it is characterized by a highly skewed binomial dice distribution and a strict entry constraint: tokens remain trapped off-board ($s=0$) until an exact roll (\textit{Jagowa}) is obtained. This entry rule induces a bottlenecked action space where reward-penalty shaping fails to guide unmasked policy gradient methods, rendering Kori Khel a compelling domain for evaluating invalid action masking techniques.
 
-While RL benchmark suites encompass Chess, Go, and StarCraft II, regional Indian games lack standardized computational state-space definitions. This work addresses this gap through the following contributions:
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\linewidth]{koriboard.jpeg}
+\caption{Visual representation of the board involved in kori khel}
+\label{kori1}
+\end{figure}
+
+%While RL benchmark suites encompass Chess, Go, and StarCraft II, regional Indian games lack standardized computational state-space definitions. 
+This work addresses this gap through the following contributions:
 \begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
     \item A formal state-space specification of Kori Khel, mapping its physical 2D cross grid into a 73-state 1D coordinate system.
-    \item An open-source OpenAI Gymnasium environment (\texttt{KoriKhelEnv}).
+    \item An open-source OpenAI Gymnasium environment \footnote{https://gymnasium.farama.org/index.html} (\texttt{KoriKhelEnv}).
     \item A comparative empirical benchmark evaluating Standard PPO versus Maskable PPO under stochastic dice conditions.
 \end{enumerate}
 
@@ -78,7 +89,7 @@ Kori Khel is played with 6 cowrie shells (\textit{kori}). The outcome of a throw
 \begin{equation}
 \mathbb{P}(K = k) = \binom{6}{k} (0.5)^6
 \end{equation}
-
+Certain throws in Kori Khel carry traditional terminology and grant special advantages, such as bonus turns or the mandatory board-entry condition:
 \begin{itemize}[leftmargin=*,noitemsep,topsep=1pt]
     \item \textbf{Pochi ($k=5$, 1 Open, 5 Closed):} 25 steps + Bonus Turn ($\mathbb{P} \approx 9.38\%$).
     \item \textbf{Jagowa ($k=1$, 5 Open, 1 Closed):} 10 steps + Bonus Turn ($\mathbb{P} \approx 9.38\%$) --- \textit{Mandatory entry roll required to release tokens from Base.}
@@ -116,9 +127,9 @@ The magnitude of each reward coefficient is scaled relative to the terminal matc
 
 % --- SECTION 4: EMPIRICAL EVALUATION ---
 \section{Empirical Benchmarks \& Results}
-We trained Standard PPO for \textbf{1M timesteps} and Maskable PPO for \textbf{2M timesteps} against 3 rule-compliant heuristic opponents:
+We trained Standard PPO for \textbf{2M timesteps} and Maskable PPO for \textbf{2M timesteps} against 3 rule-compliant heuristic opponents:
 \begin{enumerate}[leftmargin=*,noitemsep,topsep=1pt]
-    \item \textbf{Standard PPO (Unmasked, 1M):} Relies on penalty shaping ($r_{\text{invalid}} = -2$) to learn valid moves.
+    \item \textbf{Standard PPO (Unmasked, 2M):} Relies on penalty shaping ($r_{\text{invalid}} = -2$) to learn valid moves.
     \item \textbf{Maskable PPO (Masked, 2M):} Employs invalid action masking with linear learning rate decay ($3 \times 10^{-4} \to 5 \times 10^{-5}$) and tuned entropy coefficient ($\text{ent\_coef}=0.005$) to restrict policy distribution $\pi(a|s)$ exclusively to legal actions.
 \end{enumerate}
 
@@ -132,10 +143,10 @@ We trained Standard PPO for \textbf{1M timesteps} and Maskable PPO for \textbf{2
 \toprule
 \textbf{Metric} & \textbf{Standard PPO} & \textbf{Maskable PPO} \\
 \midrule
-Win Rate (\%) & 28.30\% & \textbf{36.20\%} \\
-Rule Adherence (\%) & 72.80\% & \textbf{100.00\%} \\
-Avg Episode Length & 94.2 turns & \textbf{59.5 turns} \\
-Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
+Win Rate (\%) & 28.90\% & \textbf{38.10\%} \\
+Rule Adherence (\%) & 88.40\% & \textbf{100.00\%} \\
+Avg Episode Length & 53.0 turns & \textbf{59.3 turns} \\
+Avg Episode Reward & +88.24 pts & \textbf{+115.15 pts} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -148,11 +159,13 @@ Avg Episode Reward & +80.93 pts & \textbf{+108.90 pts} \\
 \end{figure}
 
 \subsection{Analytical Insights}
-Standard PPO suffers from persistent invalid move sampling ($72.8\%$ rule adherence even after 1M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{36.20\% win rate} after 2M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
+Standard PPO suffers from persistent invalid move sampling ($88.4\%$ rule adherence even after 2M steps). Because tokens at Base ($s=0$) require an exact roll of 10 to enter the board, unmasked agents repeatedly sample illegal actions, getting trapped in local penalty minima. Conversely, Maskable PPO guarantees 100\% legal play from step 1, achieving a \textbf{38.10\% win rate} after 2M steps that significantly outperforms the 4-player random baseline ($25.0\%$).
 
 % --- SECTION 5: CONCLUSION & FUTURE WORK ---
-\section{Conclusion \& Future Work}
-This paper presented a formal MDP abstraction and Gymnasium benchmark environment for Kori Khel, proving that action masking is essential for overcoming entry-roll bottlenecks. Extending this framework to other regional games requires tailored state-space adaptations; for instance, formalizing \textbf{Dhop Khel} necessitates transitioning from our 73-state discrete single-track MDP to a continuous 2D spatial coordinate system with multi-agent ball-possession and tagging dynamics under partial observability.
+\section{Conclusion}
+This paper presented an MDP abstraction and Gymnasium benchmark environment for Kori Khel, proving that action masking is essential for overcoming entry-roll bottlenecks. According to our knowledge, this is the first work in the intersection of traditional Assamese games and RL. Having an open-source OpenAI Gymnasium environment for Kori khel is an important step towards representing Indian 
+games in the modern RL-based game research. %Extending this framework to other regional games requires tailored state-space adaptations. In future, we would like to consider more traditional games across different states of India.
+%Extending this framework to other regional games requires tailored state-space adaptations; for instance, formalizing \textbf{Dhop Khel} necessitates transitioning from our 73-state discrete single-track MDP to a continuous 2D spatial coordinate system with multi-agent ball-possession and tagging dynamics under partial observability.
 
 % --- REFERENCES ---
 \begin{thebibliography}{9}
@@ -160,8 +173,16 @@ This paper presented a formal MDP abstraction and Gymnasium benchmark environmen
 \setlength{\itemsep}{0.5pt}
 \setlength{\parskip}{0pt}
 \bibitem{ppo} J. Schulman et al., ``Proximal Policy Optimization Algorithms,'' \textit{arXiv:1707.06347}, 2017.
+\iffalse
 \bibitem{masking} S. Huang and S. Ontañón, ``A Closer Look at Invalid Action Masking in Policy Gradient Algorithms,'' \textit{FLAIRS Conference}, 2022.
 \bibitem{gymnasium} M. Towers et al., ``Gymnasium: A Standard Interface for Reinforcement Learning Environments,'' \textit{arXiv:2407.17032}, 2024.
+\fi 
+\bibitem{nath2025evaluating}
+R. Nath and R. Bhattacharyya,
+``Evaluating Vision Language Models (VLMs) across six traditional games:
+an evaluation paradigm to better assess culturally sensitive question answering systems,''
+\textit{International Journal of Information Technology}, 2025.
+doi:10.1007/s41870-025-02736-1.
 \end{thebibliography}
 
 \end{document}
