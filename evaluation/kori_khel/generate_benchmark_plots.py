@@ -23,9 +23,9 @@ plt.rcParams.update({
 def generate_head_to_head_chart():
     """Generates 3-metric comparison chart over 1,000 games."""
     metrics = {
-        'Win Rate (%)': {'Standard PPO': 28.30, 'Maskable PPO': 36.20, 'Unit': '%'},
-        'Rule Adherence (%)': {'Standard PPO': 72.80, 'Maskable PPO': 100.00, 'Unit': '%'},
-        'Avg Episode Reward': {'Standard PPO': 80.93, 'Maskable PPO': 108.90, 'Unit': 'pts'}
+        'Win Rate (%)': {'Standard PPO': 28.90, 'Maskable PPO': 38.10, 'Unit': '%'},
+        'Rule Adherence (%)': {'Standard PPO': 88.40, 'Maskable PPO': 100.00, 'Unit': '%'},
+        'Avg Episode Reward': {'Standard PPO': 88.24, 'Maskable PPO': 115.15, 'Unit': 'pts'}
     }
 
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
