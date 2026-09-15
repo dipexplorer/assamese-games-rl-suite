@@ -13,7 +13,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.results_plotter import load_results, ts2xy
 
 
-def train_agent(total_timesteps=1_000_000):
+def train_agent(total_timesteps=2_000_000):
     """Trains a baseline PPO agent on the Kori Khel environment."""
     log_dir   = os.path.join(PROJECT_ROOT, "training", "kori_khel", "logs")
     model_dir = os.path.join(PROJECT_ROOT, "agents", "kori_khel")
@@ -82,4 +82,4 @@ def _plot_results(log_dir, plot_dir):
 
 
 if __name__ == "__main__":
-    train_agent(total_timesteps=1_000_000)
+    train_agent(total_timesteps=2_000_000)
